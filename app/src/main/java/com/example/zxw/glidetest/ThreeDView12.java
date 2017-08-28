@@ -25,30 +25,30 @@ import java.util.List;
  * 使用Graphics.Camera来实现3D效果。
  */
 
-public class ThreeDView7 extends View {
+public class ThreeDView12 extends View {
 
     private int THREE_D_VIEW_WIDTH;
     private int THREE_D_VIEW_HEIGHT;
     private static final int BIT_MAP_WIDTH = 300;
     private static final int BIT_MAP_HEIGHT = 400;
-    private float cameraZtranslate = 320; // 3D rotate radius
-    private float RADIUS = 280;
+    private float cameraZtranslate = 480; // 3D rotate radius
+    private float RADIUS = 480;
     private static final float CENTER_CIRCLE_R = 60f;
     private static final float CENTER_CIRCLE_SHADOW_R = 200f;
     private GestureDetector mGestureDetector;
     private Camera camera = new Camera(); //default location: (0f, 0f, -8.0f), in pixels: -8.0f * 72 = -576f
 
-    private int[] imgs = {R.mipmap.w1,R.mipmap.w2,R.mipmap.w3,R.mipmap.w4,R.mipmap.w5,R.mipmap.w6,R.mipmap.w7};
+    private List<Matrix> matrices = new ArrayList<>();
+    private List<Bitmap> bitmaps= new ArrayList<>();
+    private int[] imgs = {R.mipmap.w1,R.mipmap.w2,R.mipmap.w3,R.mipmap.w4,R.mipmap.w5,R.mipmap.w6,R.mipmap.w7,R.mipmap.r1,R.mipmap.r2,R.mipmap.r3,R.mipmap.r4,R.mipmap.r5};
     private Paint paint;
     //    private PaintFlagsDrawFilter mSetfil;
-    private List<Bitmap> bitmaps = new ArrayList<>();
-    private List<Matrix> matrices = new ArrayList<>();
     private float distanceX = 0f;
     private float distanceY = 60f;//倾斜角度
     private float rotateDeg = 0f;
-    private final int VIEW_COUNT = 7;
-    private float angItem = 51.4f;
-    private float angItem2 = 51.6f;
+    private int VIEW_COUNT = 12;
+    private float angItem = 30f;
+    private float angItem2 = 30f;
     private float restFloat = 160;//计算每个item的float,每个item距离distanceX=160
     private float distanceToDegree; // cameraZtranslate --> 90度
 
@@ -68,26 +68,27 @@ public class ThreeDView7 extends View {
 
     private boolean isScroll = false;
 
-    public ThreeDView7(Context context) {
+    public ThreeDView12(Context context) {
         this(context, null);
     }
 
-    public ThreeDView7(Context context, AttributeSet attrs) {
+    public ThreeDView12(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ThreeDView7(Context context, AttributeSet attrs, int defStyle) {
+    public ThreeDView12(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mGestureDetector = new GestureDetector(context, new SimpleGestureListener());
 //        mSetfil = new PaintFlagsDrawFilter(0, Paint.FILTER_BITMAP_FLAG);
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setAntiAlias(true);
         camera.setLocation(0f, 0f, -cameraZtranslate);//设置camera的位置
-        for (int i = 0;i<VIEW_COUNT;i++) {
+        for (int i=0;i<VIEW_COUNT;i++) {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), imgs[i]);
             bitmap = Bitmap.createScaledBitmap(bitmap, BIT_MAP_WIDTH, BIT_MAP_HEIGHT, true);
-            bitmaps.add(bitmap);
             matrices.add(new Matrix());
+            bitmaps.add(bitmap);
+//            bitmaps.add();
         }
         reYHandler = new Handler(new Handler.Callback() {
             @Override
@@ -166,36 +167,18 @@ public class ThreeDView7 extends View {
                 } else if (distanceX < -restFloat * 7) {
                     distanceX += restFloat * 7;
                 }
-                ThreeDView7.this.invalidate();
-                if (ThreeDView7.this.stateValueListener != null) {
-                    ThreeDView7.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
+                ThreeDView12.this.invalidate();
+                if (ThreeDView12.this.stateValueListener != null) {
+                    ThreeDView12.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
                 }
 
                 if (xVelocity == 0f ) { // anim will stop
                     reLayout();
                     return true;
                 }
-                if (ThreeDView7.this.isInfinity) {
+                if (ThreeDView12.this.isInfinity) {
                     scrollHandler.sendEmptyMessage(0);
                 } else {
-                    // decrease the velocities.
-                    // 'Math.abs(xVelocity) <= distanceVelocityDecrease' make sure the xVelocity will be 0 finally.
-//                    if (xVelocity>=-distanceVelocityDecrease/2&&xVelocity <= distanceVelocityDecrease/2) {
-//                        xVelocity=0f;
-//                    }
-//                    if (xVelocity > 0) {
-//                        xVelocity -= distanceVelocityDecrease;
-//                    } else if (xVelocity<0){
-//                        xVelocity += distanceVelocityDecrease;
-//                    }
-//                    if (yVelocity>-distanceVelocityDecrease&&yVelocity < distanceVelocityDecrease) {
-//                        yVelocity=0;
-//                    }
-//                    if (yVelocity > 0) {
-//                        yVelocity -= distanceVelocityDecrease;
-//                    } else if (yVelocity<0){
-//                        yVelocity += distanceVelocityDecrease;
-//                    }
                     xVelocity = Math.abs(xVelocity) <= distanceVelocityDecrease ? 0f :
                             (xVelocity > 0 ? xVelocity - distanceVelocityDecrease : xVelocity + distanceVelocityDecrease);
                     yVelocity = Math.abs(yVelocity) <= distanceVelocityDecrease ? 0f :
@@ -227,13 +210,13 @@ public class ThreeDView7 extends View {
                         return false;
                     }
                     Log.i("yidong", distanceY + "");
-                    ThreeDView7.this.invalidate();
+                    ThreeDView12.this.invalidate();
                     clickHandler.sendEmptyMessage(1);
 
                 } else if (msg.what==0){
                     if (count == 10) {
-                        if (ThreeDView7.this.stateValueListener != null) {
-                            ThreeDView7.this.stateValueListener.startA();
+                        if (ThreeDView12.this.stateValueListener != null) {
+                            ThreeDView12.this.stateValueListener.startA();
                         }
                         count =0;
                         isScroll = false;
@@ -292,24 +275,24 @@ public class ThreeDView7 extends View {
             distanceX += restFloat * 7;
         }
         invalidate();
-        if (ThreeDView7.this.stateValueListener != null) {
-            ThreeDView7.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
+        if (ThreeDView12.this.stateValueListener != null) {
+            ThreeDView12.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
         }
     }
 
     public void updateRotateDeg(float deltaRotateDeg) {
         this.rotateDeg += deltaRotateDeg;
         invalidate();
-        if (ThreeDView7.this.stateValueListener != null) {
-            ThreeDView7.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
+        if (ThreeDView12.this.stateValueListener != null) {
+            ThreeDView12.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
         }
     }
 
     public void updateCameraZtranslate(float cameraZtranslate) {
         this.cameraZtranslate += cameraZtranslate;
         invalidate();
-        if (ThreeDView7.this.stateValueListener != null) {
-            ThreeDView7.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
+        if (ThreeDView12.this.stateValueListener != null) {
+            ThreeDView12.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
         }
     }
 
@@ -462,7 +445,7 @@ public class ThreeDView7 extends View {
         // translate canvas to locate the bitmap in center of the ThreeDViwe
         canvas.translate((THREE_D_VIEW_WIDTH - BIT_MAP_WIDTH) / 2f, (THREE_D_VIEW_HEIGHT - BIT_MAP_HEIGHT) / 2f);
 
-        drawCanvas(canvas);
+        drawCanvas(canvas, xDeg, yDeg);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG
                 | Paint.FILTER_BITMAP_FLAG));
 
@@ -473,11 +456,7 @@ public class ThreeDView7 extends View {
             matrix.reset();
             camera.save();
             camera.rotateX(xDeg); // it will lead to rotate Y and Z axis
-            if (i == 6) {
-                camera.rotateY(yDeg + angItem * 5 + angItem2);
-            } else {
-                camera.rotateY(yDeg+ angItem*i);// it will just lead to rotate Z axis, NOT X axis. BUT rotateZ(deg) will lead to nothing
-            }
+            camera.rotateY(yDeg+ angItem*i);// it will just lead to rotate Z axis, NOT X axis. BUT rotateZ(deg) will lead to nothing
             camera.rotateZ(-rotateDeg);
             camera.translate(0f, 0f, -cameraZtranslate);
             camera.getMatrix(matrix);
@@ -492,16 +471,26 @@ public class ThreeDView7 extends View {
         canvas.drawBitmap(bitmaps.get(i), matrices.get(i), paint);
     }
 
-    private void drawCanvas(Canvas canvas) {
+    private void drawCanvas(Canvas canvas, float xDeg, float yDeg) {
         if (getItemPosition() == 1 || getItemPosition() == -1 || getItemPosition() == 11) {
+            drawBitmap(canvas,9);
+            drawBitmap(canvas,8);
             drawBitmap(canvas,4);
             drawBitmap(canvas,5);
             drawBitmap(canvas,6);
             drawBitmap(canvas,7);
             drawBitmap(canvas,3);
             drawBitmap(canvas,2);
+            drawBitmap(canvas,12);
+            drawBitmap(canvas,11);
+            drawBitmap(canvas,10);
             drawBitmap(canvas,1);
         } else if (getItemPosition() == 2 || getItemPosition() == -2) {
+            drawBitmap(canvas,12);
+            drawBitmap(canvas,11);
+            drawBitmap(canvas,10);
+            drawBitmap(canvas,9);
+            drawBitmap(canvas,8);
             drawBitmap(canvas,5);
             drawBitmap(canvas,6);
             drawBitmap(canvas,4);
@@ -510,6 +499,11 @@ public class ThreeDView7 extends View {
             drawBitmap(canvas,1);
             drawBitmap(canvas,2);
         } else if (getItemPosition() == 3 || getItemPosition() == -3) {
+            drawBitmap(canvas,12);
+            drawBitmap(canvas,11);
+            drawBitmap(canvas,10);
+            drawBitmap(canvas,9);
+            drawBitmap(canvas,8);
             drawBitmap(canvas,6);
             drawBitmap(canvas,5);
             drawBitmap(canvas,7);
@@ -518,6 +512,11 @@ public class ThreeDView7 extends View {
             drawBitmap(canvas,2);
             drawBitmap(canvas,3);
         } else if (getItemPosition() == 4 || getItemPosition() == -4) {
+            drawBitmap(canvas,12);
+            drawBitmap(canvas,11);
+            drawBitmap(canvas,10);
+            drawBitmap(canvas,9);
+            drawBitmap(canvas,8);
             drawBitmap(canvas,7);
             drawBitmap(canvas,6);
             drawBitmap(canvas,1);
@@ -526,6 +525,11 @@ public class ThreeDView7 extends View {
             drawBitmap(canvas,3);
             drawBitmap(canvas,4);
         } else if (getItemPosition() == 5 || getItemPosition() == -5) {
+            drawBitmap(canvas,12);
+            drawBitmap(canvas,11);
+            drawBitmap(canvas,10);
+            drawBitmap(canvas,9);
+            drawBitmap(canvas,8);
             drawBitmap(canvas,1);
             drawBitmap(canvas,7);
             drawBitmap(canvas,2);
@@ -534,6 +538,11 @@ public class ThreeDView7 extends View {
             drawBitmap(canvas,4);
             drawBitmap(canvas,5);
         } else if (getItemPosition() == 6 || getItemPosition() == -6) {
+            drawBitmap(canvas,12);
+            drawBitmap(canvas,11);
+            drawBitmap(canvas,10);
+            drawBitmap(canvas,9);
+            drawBitmap(canvas,8);
             drawBitmap(canvas,2);
             drawBitmap(canvas,3);
             drawBitmap(canvas,4);
@@ -542,6 +551,11 @@ public class ThreeDView7 extends View {
             drawBitmap(canvas,7);
             drawBitmap(canvas,6);
         } else if (getItemPosition() == 7 || getItemPosition() == -7) {
+            drawBitmap(canvas,12);
+            drawBitmap(canvas,11);
+            drawBitmap(canvas,10);
+            drawBitmap(canvas,9);
+            drawBitmap(canvas,8);
             drawBitmap(canvas,3);
             drawBitmap(canvas,2);
             drawBitmap(canvas,4);
@@ -593,6 +607,7 @@ public class ThreeDView7 extends View {
     private static final float REFERENCE_DEGREES = 360f - MAX_DEGREES_IN_TWO_MOVE_EVENTS;
     private static final float RADIAN_TO_DEGREE = (float) (180.0 / Math.PI);
     private float oldTanDeg = 0f;
+
     private float oldScaledX = 0f;
     private float oldScaledY = 0f;
     private float old2FingersDistance = 0f;
