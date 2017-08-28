@@ -77,7 +77,7 @@
     <com.example.zxw.glidetest.CircleIndicatorView
         android:id="@+id/indicator_view"
         android:layout_width="match_parent"
-        android:layout_height="120px"
+        android:layout_height="130px"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         app:indicatorSelectColor="#00A882"
@@ -87,33 +87,5 @@
         app:indicatorColor="@color/colorAccent"
         app:indicatorTextColor="@android:color/white"
         />
-    <!--<com.example.zxw.glidetest.Custom3DView-->
-        <!--android:layout_height="250dp"-->
-        <!--android:layout_width="250dp"-->
-        <!--android:layout_marginLeft="5dp"-->
-        <!--android:layout_marginRight="5dp"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--&gt;-->
-        <!--<ImageView-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:background="@mipmap/r1"-->
-            <!--/>-->
-        <!--<ImageView-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:background="@mipmap/r2"-->
-            <!--/>-->
-        <!--<ImageView-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:background="@mipmap/r3"-->
-            <!--/>-->
-        <!--<ImageView-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:background="@mipmap/r4"-->
-            <!--/>-->
-    <!--</com.example.zxw.glidetest.Custom3DView>-->
 
 </RelativeLayout>

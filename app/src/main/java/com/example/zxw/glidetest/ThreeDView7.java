@@ -158,6 +158,14 @@ public class ThreeDView7 extends View {
 
             }
         });
+        //顺时针jump
+        new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+
+                return false;
+            }
+        });
         scrollHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
@@ -217,6 +225,8 @@ public class ThreeDView7 extends View {
         clickHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
+                isScroll = true;
+                Log.i("clickHandler", "clickHandler");
                 if (msg.what == 1) {
                     if ((distanceY > 0 && distanceY < 1) || (distanceY < 0 && distanceY > -1)) {
                         distanceY = 0;
@@ -238,23 +248,41 @@ public class ThreeDView7 extends View {
                     clickHandler.sendEmptyMessage(1);
 
                 } else if (msg.what==0){
-                    camera.translate(0,0,-180*5);
-                    invalidate();
-                    if (camera.getLocationZ() == -1800 * 5) {
+                    if (count == 10) {
                         if (ThreeDView7.this.stateValueListener != null) {
                             ThreeDView7.this.stateValueListener.startA();
                         }
-                        clickHandler.removeMessages(0);
-                        return true;
+                        count =0;
+                        isScroll = false;
+                        clickHandler.removeCallbacksAndMessages(null);
+                    } else {
+                        camera.translate(0,0,-180*5);
+                        invalidate();
+                        count++;
+                        clickHandler.sendEmptyMessage(0);
                     }
-                    clickHandler.sendEmptyMessage(0);
+                } else if (msg.what == 2) {
+                    if (count == 10) {
+                        reLayoutY();
+                        count =0;
+                        isScroll = false;
+                        clickHandler.removeCallbacksAndMessages(null);
+                    } else {
+                        camera.translate(0, 0, 180*5);
+                        invalidate();
+                        count++;
+                        clickHandler.sendEmptyMessage(2);
+                    }
 
                 }
                 return true;
             }
         });
     }
-
+    private int count = 0;//用来计数动画进度
+    public void resetStart() {
+        clickHandler.sendEmptyMessageDelayed(2,500);
+    }
 
     //设置速度下降率
     public void setDistanceVelocityDecrease(float distanceVelocityDecrease) {
@@ -390,7 +418,7 @@ public class ThreeDView7 extends View {
     }
 
     public int getItemPosition() {
-        int position = 0;
+        int position = 1;
         if (distanceX > -restFloat / 2 && distanceX <= restFloat / 2) {
             position = 1;
         } else if (distanceX > restFloat * 13 / 2 && distanceX <= restFloat * 7) {

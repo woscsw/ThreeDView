@@ -22,7 +22,7 @@ public class OpenActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         view = new GLSurfaceView(this);
         view.setRenderer(new OpenGLRenderer());
-        setContentView(view);
+//        setContentView(view);
         setContentView(R.layout.item_list);
     }
 }

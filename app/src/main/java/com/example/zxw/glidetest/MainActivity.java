@@ -15,7 +15,7 @@ public class MainActivity extends Activity {
     private TextView yValue;
     private TextView rotateValue;
     private TextView cameraZvalue;
-
+    ThreeDView7 threeDView;
     private ThreeDViewController threeDViewController;
     private CircleIndicatorView mIndicatorView;
     @Override
@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
         yValue = (TextView) findViewById(R.id.tv_y_value);
         rotateValue = (TextView) findViewById(R.id.tv_rotate_value);
         cameraZvalue = (TextView) findViewById(R.id.tv_cameraZ_value);
-        final ThreeDView7 threeDView = (ThreeDView7)findViewById(R.id.three_d_view);
+        threeDView = (ThreeDView7)findViewById(R.id.three_d_view);
         threeDView.setOnClick(new ThreeDView7.OnMyClick() {
             @Override
             public void onMyClick(View view, int position) {
@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
             @Override
             public void startA() {
                 startActivity(new Intent(MainActivity.this,OpenActivity.class));
+//                Toast.makeText(MainActivity.this, "assdfas", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -91,4 +92,9 @@ public class MainActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        threeDView.resetStart();
+    }
 }
