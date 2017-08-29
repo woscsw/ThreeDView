@@ -19,12 +19,6 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Created by chenzhifei on 2017/6/25.
- * 使用Graphics.Camera来实现3D效果。
- */
-
 public class ThreeDView7 extends View {
 
     private int THREE_D_VIEW_WIDTH;
@@ -33,8 +27,6 @@ public class ThreeDView7 extends View {
     private static final int BIT_MAP_HEIGHT = 400;
     private float cameraZtranslate = 320; // 3D rotate radius
     private float RADIUS = 280;
-    private static final float CENTER_CIRCLE_R = 60f;
-    private static final float CENTER_CIRCLE_SHADOW_R = 200f;
     private GestureDetector mGestureDetector;
     private Camera camera = new Camera(); //default location: (0f, 0f, -8.0f), in pixels: -8.0f * 72 = -576f
 
@@ -63,8 +55,8 @@ public class ThreeDView7 extends View {
 
     private Handler scrollHandler;//滑动的动画
     private Handler clickHandler;//点击item,跳转页面
-    private Handler jumpHandler;//点击某item，跳转到某item
-    private Handler reYHandler;//复位Y
+    private Handler jumpHandler;//跳转到某item
+    private Handler reYHandler;//复位绕X轴的旋转
 
     private boolean isScroll = false;
 
@@ -139,14 +131,6 @@ public class ThreeDView7 extends View {
                 jumpHandler.sendEmptyMessage(0);
                 return false;
 
-            }
-        });
-        //顺时针jump
-        new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message msg) {
-
-                return false;
             }
         });
         scrollHandler = new Handler(new Handler.Callback() {
@@ -230,7 +214,7 @@ public class ThreeDView7 extends View {
                     ThreeDView7.this.invalidate();
                     clickHandler.sendEmptyMessage(1);
 
-                } else if (msg.what == 0) {
+                } else if (msg.what == 0) {//放大变形，跳转
                     if (count == 10) {
                         if (ThreeDView7.this.stateValueListener != null) {
                             ThreeDView7.this.stateValueListener.startA();
@@ -244,7 +228,7 @@ public class ThreeDView7 extends View {
                         count++;
                         clickHandler.sendEmptyMessage(0);
                     }
-                } else if (msg.what == 2) {
+                } else if (msg.what == 2) {//缩小变形
                     if (count == 10) {
                         reLayoutY();
                         count = 0;
@@ -697,12 +681,12 @@ public class ThreeDView7 extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getPointerCount() > 2) {
-            moreThan2Fingers = true;
-            if (twoFingersGestureListener != null) {
-                twoFingersGestureListener.onCancel();
-            }
-        }
+//        if (event.getPointerCount() > 2) {
+//            moreThan2Fingers = true;
+//            if (twoFingersGestureListener != null) {
+//                twoFingersGestureListener.onCancel();
+//            }
+//        }
         vt.addMovement(event);
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
