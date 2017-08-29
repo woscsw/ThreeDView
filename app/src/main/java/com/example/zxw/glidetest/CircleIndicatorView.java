@@ -23,7 +23,7 @@ import java.util.List;
  */
 
 public class CircleIndicatorView extends View implements ViewPager.OnPageChangeListener{
-    private static final String LETTER[] = new String[]{"1","2","3","4","5","6","7","8","9"};
+    private static final String LETTER[] = new String[]{"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"};
     // private int mSelectColor = Color.parseColor("#E38A7C");
     private int mSelectColor = Color.parseColor("#FFFFFF");
     private Paint mCirclePaint;
@@ -33,7 +33,7 @@ public class CircleIndicatorView extends View implements ViewPager.OnPageChangeL
     private int mStrokeWidth;//border
     private int mTextColor;// 小圆点中文字的颜色
     private int mDotNormalColor;// 小圆点默认颜色
-    private int mSpace = 0;// 圆点之间的间距
+    private int mSpace = 15;// 圆点之间的间距
     private List<Indicator> mIndicators;
     private int mSelectPosition = 0; // 选中的位置
     private FillMode mFillMode = FillMode.NONE;// 默认只有小圆点
@@ -100,7 +100,7 @@ public class CircleIndicatorView extends View implements ViewPager.OnPageChangeL
         TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.CircleIndicatorView);
         mRadius = (int) typedArray.getDimensionPixelSize(R.styleable.CircleIndicatorView_indicatorRadius,DisplayUtils.dpToPx(16));
         mStrokeWidth = (int) typedArray.getDimensionPixelSize(R.styleable.CircleIndicatorView_indicatorBorderWidth,DisplayUtils.dpToPx(2));
-        mSpace = typedArray.getDimensionPixelSize(R.styleable.CircleIndicatorView_indicatorSpace,DisplayUtils.dpToPx(5));
+        mSpace = typedArray.getDimensionPixelSize(R.styleable.CircleIndicatorView_indicatorSpace,DisplayUtils.dpToPx(15));
         // color
         mTextColor = typedArray.getColor(R.styleable.CircleIndicatorView_indicatorTextColor,Color.BLACK);
         mSelectColor = typedArray.getColor(R.styleable.CircleIndicatorView_indicatorSelectColor,Color.WHITE);

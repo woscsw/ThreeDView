@@ -16,7 +16,7 @@ public class MainActivity extends Activity {
     private TextView rotateValue;
     private TextView cameraZvalue;
     ThreeDView7 threeDView;
-    private ThreeDViewController threeDViewController;
+    private ThreeDViewController7 threeDViewController;
     private CircleIndicatorView mIndicatorView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        threeDViewController = new ThreeDViewController(threeDView);
+        threeDViewController = new ThreeDViewController7(threeDView);
         mIndicatorView = (CircleIndicatorView) findViewById(R.id.indicator_view);
 
 

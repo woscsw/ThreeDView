@@ -83,12 +83,12 @@ public class ThreeDView12 extends View {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setAntiAlias(true);
         camera.setLocation(0f, 0f, -cameraZtranslate);//设置camera的位置
+        camera.translate(0,0,cameraZtranslate*20);
         for (int i=0;i<VIEW_COUNT;i++) {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), imgs[i]);
             bitmap = Bitmap.createScaledBitmap(bitmap, BIT_MAP_WIDTH, BIT_MAP_HEIGHT, true);
             matrices.add(new Matrix());
             bitmaps.add(bitmap);
-//            bitmaps.add();
         }
         reYHandler = new Handler(new Handler.Callback() {
             @Override
