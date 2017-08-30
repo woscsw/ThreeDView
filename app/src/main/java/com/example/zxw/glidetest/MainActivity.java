@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void startA() {
-                startActivity(new Intent(MainActivity.this,OpenActivity.class));
+                startActivityForResult(new Intent(MainActivity.this,OpenActivity.class),0);
 //                Toast.makeText(MainActivity.this, "assdfas", Toast.LENGTH_SHORT).show();
             }
         });
@@ -93,8 +93,9 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         threeDView.resetStart();
     }
+
 }

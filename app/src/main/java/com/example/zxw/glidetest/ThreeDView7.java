@@ -86,13 +86,13 @@ public class ThreeDView7 extends View {
             public boolean handleMessage(Message msg) {
                 Log.i("jumpHandler", "jumpItemY=" + jumpItemY + "----distanceY=" + distanceY);
                 isScroll = true;
-                if ((distanceY - jumpItemY >= -10 && distanceY - jumpItemY <= 10) || (jumpItemY - distanceY >= -10 && jumpItemY - distanceY <= 10)) {
+                if ((distanceY - jumpItemY >= -2 && distanceY - jumpItemY <= 2) || (jumpItemY - distanceY >= -2 && jumpItemY - distanceY <= 2)) {
                     distanceY = jumpItemY;
                 }
                 if (distanceY > jumpItemY) {
-                    distanceY = distanceY - 5;
+                    distanceY = distanceY - (distanceY-jumpItemY)/5;
                 } else if (distanceY < jumpItemY) {
-                    distanceY = distanceY + 5;
+                    distanceY = distanceY + (jumpItemY-distanceY)/5;
                 }
                 if (distanceY == jumpItemY) {
                     reYHandler.removeMessages(0);
@@ -112,7 +112,11 @@ public class ThreeDView7 extends View {
             public boolean handleMessage(Message msg) {
                 Log.i("jumpHandler", "jumpItemX=" + jumpItemX + "----xx=" + distanceX);
                 isScroll = true;
-                if ((distanceX - jumpItemX >= -10 && distanceX - jumpItemX <= 10) || (jumpItemX - distanceX >= -10 && jumpItemX - distanceX <= 10)) {
+                //
+//                distanceX = Math.abs(xVelocity) <= 10 ? 0f :
+//                        (xVelocity > 0 ? xVelocity - 10 : xVelocity + 10);
+                //
+                if ((distanceX - jumpItemX >= -2 && distanceX - jumpItemX <= 2) || (jumpItemX - distanceX >= -2 && jumpItemX - distanceX <= 2)) {
                     distanceX = jumpItemX;
                 }
                 if (distanceX > jumpItemX) {
@@ -163,23 +167,6 @@ public class ThreeDView7 extends View {
                     scrollHandler.sendEmptyMessage(0);
                 } else {
                     // decrease the velocities.
-                    // 'Math.abs(xVelocity) <= distanceVelocityDecrease' make sure the xVelocity will be 0 finally.
-//                    if (xVelocity>=-distanceVelocityDecrease/2&&xVelocity <= distanceVelocityDecrease/2) {
-//                        xVelocity=0f;
-//                    }
-//                    if (xVelocity > 0) {
-//                        xVelocity -= distanceVelocityDecrease;
-//                    } else if (xVelocity<0){
-//                        xVelocity += distanceVelocityDecrease;
-//                    }
-//                    if (yVelocity>-distanceVelocityDecrease&&yVelocity < distanceVelocityDecrease) {
-//                        yVelocity=0;
-//                    }
-//                    if (yVelocity > 0) {
-//                        yVelocity -= distanceVelocityDecrease;
-//                    } else if (yVelocity<0){
-//                        yVelocity += distanceVelocityDecrease;
-//                    }
                     xVelocity = Math.abs(xVelocity) <= distanceVelocityDecrease ? 0f :
                             (xVelocity > 0 ? xVelocity - distanceVelocityDecrease : xVelocity + distanceVelocityDecrease);
                     yVelocity = Math.abs(yVelocity) <= distanceVelocityDecrease ? 0f :
@@ -210,7 +197,6 @@ public class ThreeDView7 extends View {
                         clickHandler.sendEmptyMessage(0);
                         return false;
                     }
-                    Log.i("yidong", distanceY + "");
                     ThreeDView7.this.invalidate();
                     clickHandler.sendEmptyMessage(1);
 
@@ -247,7 +233,7 @@ public class ThreeDView7 extends View {
         });
     }
 
-    private int count = 0;//用来计数动画进度
+    private int count = 0;//用来计数动画进度clickHandler
 
     public void resetStart() {
         clickHandler.sendEmptyMessageDelayed(2, 500);
@@ -564,69 +550,29 @@ public class ThreeDView7 extends View {
             matrix.postTranslate(BIT_MAP_WIDTH / 2, BIT_MAP_HEIGHT / 2);
         }
     }
-
-    private void drawBitmap(Canvas canvas, int i) {
-        i--;
-        canvas.drawBitmap(bitmaps.get(i), matrices.get(i), paint);
+    //绘制顺序
+    private void drawBitmap(Canvas canvas, int[] num) {
+        for (int i = 0;i<num.length;i++) {
+            int j = num[i]-1;
+            canvas.drawBitmap(bitmaps.get(j), matrices.get(j), paint);
+        }
     }
 
     private void drawCanvas(Canvas canvas) {
         if (getItemPosition() == 1 || getItemPosition() == -1 || getItemPosition() == 11) {
-            drawBitmap(canvas, 4);
-            drawBitmap(canvas, 5);
-            drawBitmap(canvas, 6);
-            drawBitmap(canvas, 7);
-            drawBitmap(canvas, 3);
-            drawBitmap(canvas, 2);
-            drawBitmap(canvas, 1);
+            drawBitmap(canvas,new int[]{4,5,6,7,3,2,1});
         } else if (getItemPosition() == 2 || getItemPosition() == -2) {
-            drawBitmap(canvas, 5);
-            drawBitmap(canvas, 6);
-            drawBitmap(canvas, 4);
-            drawBitmap(canvas, 7);
-            drawBitmap(canvas, 3);
-            drawBitmap(canvas, 1);
-            drawBitmap(canvas, 2);
+            drawBitmap(canvas,new int[]{5,6,4,7,3,1,2});
         } else if (getItemPosition() == 3 || getItemPosition() == -3) {
-            drawBitmap(canvas, 6);
-            drawBitmap(canvas, 5);
-            drawBitmap(canvas, 7);
-            drawBitmap(canvas, 1);
-            drawBitmap(canvas, 4);
-            drawBitmap(canvas, 2);
-            drawBitmap(canvas, 3);
+            drawBitmap(canvas,new int[]{6,5,7,1,4,2,3});
         } else if (getItemPosition() == 4 || getItemPosition() == -4) {
-            drawBitmap(canvas, 7);
-            drawBitmap(canvas, 6);
-            drawBitmap(canvas, 1);
-            drawBitmap(canvas, 2);
-            drawBitmap(canvas, 5);
-            drawBitmap(canvas, 3);
-            drawBitmap(canvas, 4);
+            drawBitmap(canvas,new int[]{7,6,1,2,5,3,4});
         } else if (getItemPosition() == 5 || getItemPosition() == -5) {
-            drawBitmap(canvas, 1);
-            drawBitmap(canvas, 7);
-            drawBitmap(canvas, 2);
-            drawBitmap(canvas, 3);
-            drawBitmap(canvas, 6);
-            drawBitmap(canvas, 4);
-            drawBitmap(canvas, 5);
+            drawBitmap(canvas,new int[]{1,7,2,3,6,4,5});
         } else if (getItemPosition() == 6 || getItemPosition() == -6) {
-            drawBitmap(canvas, 2);
-            drawBitmap(canvas, 3);
-            drawBitmap(canvas, 4);
-            drawBitmap(canvas, 1);
-            drawBitmap(canvas, 5);
-            drawBitmap(canvas, 7);
-            drawBitmap(canvas, 6);
+            drawBitmap(canvas,new int[]{2,3,4,1,5,7,6});
         } else if (getItemPosition() == 7 || getItemPosition() == -7) {
-            drawBitmap(canvas, 3);
-            drawBitmap(canvas, 2);
-            drawBitmap(canvas, 4);
-            drawBitmap(canvas, 5);
-            drawBitmap(canvas, 6);
-            drawBitmap(canvas, 1);
-            drawBitmap(canvas, 7);
+            drawBitmap(canvas,new int[]{3,2,4,5,6,1,7});
         }
     }
 
@@ -681,7 +627,7 @@ public class ThreeDView7 extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        if (event.getPointerCount() > 2) {
+//        if (event.getPointerCount() > 2) {//三指时会取消各种handler
 //            moreThan2Fingers = true;
 //            if (twoFingersGestureListener != null) {
 //                twoFingersGestureListener.onCancel();
@@ -897,13 +843,8 @@ public class ThreeDView7 extends View {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            //在屏幕上拖动事件。无论是用手拖动view，或者是以抛的动作滚动，都会多次触发,这个方法
-            Log.i("Gesture-onScroll", "e1.getAction()=" + e1.getAction() + "---e2.getac()=" + e2.getAction() + "--distanceX=" + distanceX + "--distanceY=" + distanceY);
-//            if (distanceY < -100) {
-//                distanceY = -100;
-//            } else if(distanceY>30){
-//                distanceY=30;
-//            }
+            //在屏幕上拖动事件。无论是用手拖动view，或者是以抛的动作滚动，都会多次触发,这个方法---好像没卵用
+//            Log.i("Gesture-onScroll", "e1.getAction()=" + e1.getAction() + "---e2.getac()=" + e2.getAction() + "--distanceX=" + distanceX + "--distanceY=" + distanceY);
             return false;
         }
 
