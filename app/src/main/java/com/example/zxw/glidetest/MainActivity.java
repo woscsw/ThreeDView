@@ -52,8 +52,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void startA() {
+                threeDView.stopScroll();
                 startActivityForResult(new Intent(MainActivity.this,OpenActivity.class),0);
-//                Toast.makeText(MainActivity.this, "assdfas", Toast.LENGTH_SHORT).show();
             }
         });
 

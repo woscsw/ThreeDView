@@ -17,7 +17,7 @@ public class ThreeDViewController7 {
         this.threeDView.setTwoFingersGestureListener(new ThreeDView7.TwoFingersGestureListener() {
             @Override
             public void onDown(float downX, float downY, long downTime) {
-//                ThreeDViewController7.this.threeDView.stopScoll();
+//                ThreeDViewController7.this.threeDView.stopScroll();
             }
 
             @Override
