@@ -22,11 +22,11 @@ public class ThreeDViewController7 {
 
             @Override
             public void onMoved(float deltaMovedX, float deltaMovedY, long deltaMilliseconds) {
-                if (deltaMovedY < -100) {
-                    deltaMovedY = -100;
-                } else if(deltaMovedY>30){
-                    deltaMovedY=30;
-                }
+//                if (deltaMovedY < -100) {
+//                    deltaMovedY = -100;
+//                } else if(deltaMovedY>30){
+//                    deltaMovedY=30;
+//                }
                 ThreeDViewController7.this.threeDView.updateXY(deltaMovedX, deltaMovedY);//限制了y轴的滑动
             }
 

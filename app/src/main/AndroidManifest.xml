@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".OpenActivity"/>
+        <activity android:name=".pre.PreActivity"/>
     </application>
 
 </manifest>

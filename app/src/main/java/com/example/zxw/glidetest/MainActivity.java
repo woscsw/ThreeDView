@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.zxw.glidetest.pre.PreActivity;
+
 
 public class MainActivity extends Activity {
 
@@ -53,7 +55,7 @@ public class MainActivity extends Activity {
             @Override
             public void startA() {
                 threeDView.stopScroll();
-                startActivityForResult(new Intent(MainActivity.this,OpenActivity.class),0);
+                startActivityForResult(new Intent(MainActivity.this,PreActivity.class),0);
             }
         });
 
