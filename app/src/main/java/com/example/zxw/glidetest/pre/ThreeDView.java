@@ -42,7 +42,7 @@ public class ThreeDView extends View {
     private Bitmap bitmap;
 
     private float distanceX = 0f;
-    private float distanceY = 0f;
+    private float distanceY = 60f;
     private float rotateDeg = 0f;
     private float cameraZtranslate; // 3D rotate radius
 
@@ -75,8 +75,8 @@ public class ThreeDView extends View {
         animHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-                distanceX += (xVelocity * 0.016);
-                distanceY += (yVelocity * 0.016);
+                distanceX += (xVelocity * 0.004);
+                distanceY += (yVelocity * 0.004);
 
                 ThreeDView.this.invalidate();
 
@@ -181,8 +181,8 @@ public class ThreeDView extends View {
         setMatrixBack(xDeg, yDeg);
         setMatrixLeft(xDeg, yDeg);
         setMatrixRight(xDeg, yDeg);
-        setMatrixTop(xDeg, yDeg);
-        setMatrixBottom(xDeg, yDeg);
+//        setMatrixTop(xDeg, yDeg);
+//        setMatrixBottom(xDeg, yDeg);
 
         // translate canvas to locate the bitmap in center of the ThreeDViwe
         canvas.translate((THREE_D_VIEW_WIDTH - BIT_MAP_WIDTH) / 2f, (THREE_D_VIEW_HEIGHT - BIT_MAP_HEIGHT) / 2f);
@@ -323,25 +323,25 @@ public class ThreeDView extends View {
             if (Math.cos(Math.toRadians(xDeg)) <= 0 || Math.cos(Math.toRadians(yDeg - 90f)) <= 0) {
                 canvas.drawBitmap(bitmap, matrixLeft, paint);
                 if (Math.cos(Math.toRadians(xDeg - 90f)) <= 0 || Math.cos(Math.toRadians(yDeg)) <= 0) {
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                 } else {
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                 }
                 canvas.drawBitmap(bitmap, matrixRight, paint);
             } else {
                 canvas.drawBitmap(bitmap, matrixRight, paint);
                 if (Math.cos(Math.toRadians(xDeg - 90f)) <= 0 || Math.cos(Math.toRadians(yDeg)) <= 0) {
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                 } else {
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                 }
                 canvas.drawBitmap(bitmap, matrixLeft, paint);
             }
@@ -351,25 +351,25 @@ public class ThreeDView extends View {
             if (Math.cos(Math.toRadians(xDeg)) <= 0 || Math.cos(Math.toRadians(yDeg - 90f)) <= 0) {
                 canvas.drawBitmap(bitmap, matrixLeft, paint);
                 if (Math.cos(Math.toRadians(xDeg - 90f)) <= 0 || Math.cos(Math.toRadians(yDeg)) <= 0) {
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                 } else {
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                 }
                 canvas.drawBitmap(bitmap, matrixRight, paint);
             } else {
                 canvas.drawBitmap(bitmap, matrixRight, paint);
                 if (Math.cos(Math.toRadians(xDeg - 90f)) <= 0 || Math.cos(Math.toRadians(yDeg)) <= 0) {
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                 } else {
-                    canvas.drawBitmap(bitmap, matrixBottom, paint);
+//                    canvas.drawBitmap(bitmap, matrixBottom, paint);
                     drawCenter(canvas);
-                    canvas.drawBitmap(bitmap, matrixTop, paint);
+//                    canvas.drawBitmap(bitmap, matrixTop, paint);
                 }
                 canvas.drawBitmap(bitmap, matrixLeft, paint);
             }

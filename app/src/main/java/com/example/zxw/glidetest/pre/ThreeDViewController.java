@@ -26,7 +26,7 @@ public class ThreeDViewController {
 
             @Override
             public void onMoved(float deltaMovedX, float deltaMovedY, long deltaMilliseconds) {
-                ThreeDViewController.this.threeDView.updateXY(deltaMovedX, deltaMovedY);
+                ThreeDViewController.this.threeDView.updateXY(deltaMovedX, 0);
             }
 
             @Override
@@ -42,7 +42,7 @@ public class ThreeDViewController {
             @Override
             public void onUp(float upX, float upY, long upTime, float xVelocity, float yVelocity) {
 
-                ThreeDViewController.this.threeDView.startAnim(xVelocity, yVelocity);
+                ThreeDViewController.this.threeDView.startAnim(xVelocity, 0);
             }
 
             @Override
