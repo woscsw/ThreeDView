@@ -27,7 +27,6 @@ public class ThreeDViewController7 {
 //                } else if(deltaMovedY>30){
 //                    deltaMovedY=30;
 //                }
-                ThreeDViewController7.this.threeDView.updateXY(deltaMovedX, deltaMovedY);//限制了y轴的滑动
             }
 
             @Override

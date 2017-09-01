@@ -69,7 +69,7 @@ public class ThreeDView extends View {
     public ThreeDView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
+        bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.z1);
         bitmap = Bitmap.createScaledBitmap(bitmap, BIT_MAP_WIDTH, BIT_MAP_HEIGHT, false);
 
         animHandler = new Handler(new Handler.Callback() {
