@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.zxw.glidetest.pre.PreActivity;
 
@@ -29,12 +27,6 @@ public class MainActivity extends Activity {
         rotateValue = (TextView) findViewById(R.id.tv_rotate_value);
         cameraZvalue = (TextView) findViewById(R.id.tv_cameraZ_value);
         threeDView = (ThreeDView7)findViewById(R.id.three_d_view);
-        threeDView.setOnClick(new ThreeDView7.OnMyClick() {
-            @Override
-            public void onMyClick(View view, int position) {
-                Toast.makeText(MainActivity.this, "position=" + position, Toast.LENGTH_SHORT).show();
-            }
-        });
         threeDView.setStateValueListener(new ThreeDView7.StateValueListener() {
             @Override
             public void stateValue(float distanceX, float distanceY, float rotateDeg, float cameraZtranslate) {

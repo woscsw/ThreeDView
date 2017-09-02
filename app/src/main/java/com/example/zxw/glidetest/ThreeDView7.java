@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Camera;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
@@ -23,12 +22,6 @@ import java.util.List;
 
 public class ThreeDView7 extends View {
     private static final String TAG = ThreeDView7.class.getSimpleName();
-    /**
-     * 180 180
-     * 10
-     * 15
-     * 20
-     */
     private int THREE_D_VIEW_WIDTH;
     private int THREE_D_VIEW_HEIGHT;
     private static final int BIT_MAP_WIDTH = 300;
@@ -36,7 +29,7 @@ public class ThreeDView7 extends View {
     private float cameraZtranslate = 320; // 3D rotate radius
     private GestureDetector mGestureDetector;
     private Camera camera = new Camera(); //default location: (0f, 0f, -8.0f), in pixels: -8.0f * 72 = -576f
-
+    private PaintFlagsDrawFilter paintFilter;
     private int[] imgs = {R.mipmap.z1, R.mipmap.z2, R.mipmap.z3, R.mipmap.z4, R.mipmap.z5, R.mipmap.z6, R.mipmap.z7};
     private Paint paint;
     private List<Bitmap> bitmaps = new ArrayList<>();
@@ -49,8 +42,9 @@ public class ThreeDView7 extends View {
     private float angItem2 = 51.6f;
     private float restFloat = 160;//计算每个item的float,每个item距离distanceX=160
     private float distanceToDegree;
-    private float X_VELOCITY_DECREASE = 0.006f;
-    private float X_MOVE_DECREASE = 0.7f;
+    private float X_VELOCITY_DECREASE = 0.003f;//数值越小惯性越小
+    private float X_MOVE_DECREASE = 0.7f;//手指移动的阻力
+    private float Y_MOVE_DECREASE = 0.7f;//手指移动的阻力
     private boolean isInfinity = false;
     private float distanceVelocityDecrease = 10f; //decrease 1 pixels/second when a message is handled in the loop
     //loop frequency is 60hz or 120hz when handleMessage(msg) includes UI update code
@@ -85,8 +79,16 @@ public class ThreeDView7 extends View {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setAntiAlias(true);
         paint.setDither(true);
+        paintFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG
+                | Paint.FILTER_BITMAP_FLAG);
 //        camera.setLocation(0f, 0f, -cameraZtranslate);//设置camera的位置,这个有问题...形状都变了,应该用下面的函数
         camera.translate(0,0,250);//cameraZtranslate越大,view越远
+        this.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
         for (int i = 0; i < VIEW_COUNT; i++) {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), imgs[i]);
             bitmap = Bitmap.createScaledBitmap(bitmap, BIT_MAP_WIDTH, BIT_MAP_HEIGHT, true);
@@ -98,7 +100,7 @@ public class ThreeDView7 extends View {
             public boolean handleMessage(Message msg) {
                 Log.i("reYHandler", "jumpItemY=" + jumpItemY + "----distanceY=" + distanceY);
                 isScroll = true;
-                if ((distanceY - jumpItemY >= -2 && distanceY - jumpItemY <= 2) || (jumpItemY - distanceY >= -2 && jumpItemY - distanceY <= 2)) {
+                if (Math.abs(distanceY - jumpItemY )<= distanceYDecrease) {
                     distanceY = jumpItemY;
                 }
                 if (distanceY > jumpItemY) {
@@ -109,11 +111,11 @@ public class ThreeDView7 extends View {
                 if (distanceY == jumpItemY) {
                     reYHandler.removeMessages(0);
                     invalidate();
-                    stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
                     isScroll = false;
                     return false;
                 }
                 invalidate();
+                stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
                 reYHandler.sendEmptyMessage(0);
                 return false;
 
@@ -124,10 +126,9 @@ public class ThreeDView7 extends View {
             public boolean handleMessage(Message msg) {
                 Log.i("jumpHandler", "jumpItemX=" + jumpItemX + "----xx=" + distanceX);
                 isScroll = true;
-                if (Math.abs(distanceX - jumpItemX) <= 2 ) {
+                if (Math.abs(distanceX - jumpItemX) <= distanceXDecrease ) {
                     distanceX = jumpItemX;
                 }
-
                 if (distanceX > jumpItemX) {
                     distanceX = distanceX - distanceXDecrease;
                 } else if (distanceX < jumpItemX) {
@@ -202,7 +203,7 @@ public class ThreeDView7 extends View {
             public boolean handleMessage(Message msg) {
                 Log.i("scrollHandler", "xVelocity=" + xVelocity + "--yVelocity=" + yVelocity + "---distanceX=" + distanceX);
                 isScroll = true;
-                distanceX += (xVelocity * X_VELOCITY_DECREASE);//数值越小惯性越小
+                distanceX += (xVelocity * X_VELOCITY_DECREASE);
 //                distanceY += (yVelocity * X_VELOCITY_DECREASE);
                 if (distanceY < -30) {
                     distanceY = -30;
@@ -218,11 +219,11 @@ public class ThreeDView7 extends View {
                 if (ThreeDView7.this.stateValueListener != null) {
                     ThreeDView7.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
                 }
-                if (Math.abs(xVelocity) < 350f) {//这么慢，不让他滑动了
+                if (Math.abs(xVelocity) < 350f) {//这么慢，不让他惯性滑动了
                     reLayout();
                     return true;
                 }
-                if (Math.abs(xVelocity) < 600f) {//500f的速度好像还是有点小
+                if (Math.abs(xVelocity) < 600f) {
                     int position = getItemPosition();//当前大概位置
                     float itemFloat = getItemFloat();//当前位置
                     if (xVelocity > 0) { //逆时针
@@ -408,7 +409,7 @@ public class ThreeDView7 extends View {
     public void updateXY(float movedX, float movedY) {
         Log.i(TAG, "updateXY: movedX= "+movedX+"  ---movedY= "+movedY);
         this.distanceX += movedX*X_MOVE_DECREASE;
-        this.distanceY += movedY;
+        this.distanceY += movedY*Y_MOVE_DECREASE;
         if (distanceY > 100) {
             distanceY = 100;
         } else if (distanceY < -30) {
@@ -505,18 +506,6 @@ public class ThreeDView7 extends View {
         jumpHandler.removeMessages(0);
         jumpHandler.sendEmptyMessage(0);
 
-    }
-
-    private OnMyClick onMyClick;
-
-    public void setOnClick(final OnMyClick onClick) {
-        this.onMyClick = onClick;
-        this.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
     }
 
     public void jumpNext() {
@@ -922,19 +911,22 @@ public class ThreeDView7 extends View {
     }
 
     @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         // convert distances in pixels into degrees
         float xDeg = -distanceY * distanceToDegree;
         float yDeg = distanceX * distanceToDegree;
         Log.i(TAG,"onDraw  xdeg=" + xDeg + "---ydeg=" + yDeg);
-        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG
-                | Paint.FILTER_BITMAP_FLAG));
+        canvas.setDrawFilter(paintFilter);
         setMatrix(xDeg, yDeg);
         // translate canvas to locate the bitmap in center of the ThreeDViwe
         canvas.translate((THREE_D_VIEW_WIDTH - BIT_MAP_WIDTH) / 2f, (THREE_D_VIEW_HEIGHT - BIT_MAP_HEIGHT) / 2f);
+        canvas.clipRect(-150, -90, 450, 600);
         drawCanvas(canvas);
-
-
     }
     private void setMatrix(float xDeg, float yDeg) {
         for (int i = 0; i < VIEW_COUNT; i++) {
@@ -962,36 +954,33 @@ public class ThreeDView7 extends View {
 
     //绘制顺序
     private void drawBitmap(Canvas canvas, int[] num) {
-        for (int i = 0; i < num.length; i++) {
-            int j = num[i] - 1;
-            canvas.drawBitmap(bitmaps.get(j), matrices.get(j), paint);
+        for (int i :num) {
+            canvas.drawBitmap(bitmaps.get(i), matrices.get(i), paint);
         }
     }
-    private void drawCenter(Canvas canvas) {
-        // draw center circle shadow first
-        paint.setColor(Color.parseColor("#550000ff"));
-        canvas.drawCircle(BIT_MAP_WIDTH / 2, BIT_MAP_HEIGHT / 2, cameraZtranslate, paint);
-
-        // draw center circle second, it's above the shadow
-        paint.setColor(Color.parseColor("#0000ff"));
-        canvas.drawCircle(BIT_MAP_WIDTH / 2, BIT_MAP_HEIGHT / 2, 100, paint);
-    }
+    int[] i1 = {3, 4, 5, 6, 2, 1, 0};
+    int[] i2 = {4, 5, 3, 6, 2, 0, 1};
+    int[] i3 = {5, 4, 6, 0, 3, 1, 2};
+    int[] i4 = {6, 5, 0, 1, 4, 2, 3};
+    int[] i5 = {0, 6, 1, 2, 5, 3, 4};
+    int[] i6 = {1, 2, 3, 0, 4, 6, 5};
+    int[] i7 = {2, 1, 3, 4, 5, 0, 6};
     private void drawCanvas(Canvas canvas) {
         int position = getItemPosition();
         if (position == 1 || position == -1 || position == 11) {
-            drawBitmap(canvas, new int[]{4, 5, 6, 7, 3, 2, 1});
+            drawBitmap(canvas,i1);
         } else if (position == 2 || position == -2) {
-            drawBitmap(canvas, new int[]{5, 6, 4, 7, 3, 1, 2});
+            drawBitmap(canvas, i2);
         } else if (position == 3 || position == -3) {
-            drawBitmap(canvas, new int[]{6, 5, 7, 1, 4, 2, 3});
+            drawBitmap(canvas, i3);
         } else if (position == 4 || position == -4) {
-            drawBitmap(canvas, new int[]{7, 6, 1, 2, 5, 3, 4});
+            drawBitmap(canvas, i4);
         } else if (position == 5 || position == -5) {
-            drawBitmap(canvas, new int[]{1, 7, 2, 3, 6, 4, 5});
+            drawBitmap(canvas, i5);
         } else if (position == 6 || position == -6) {
-            drawBitmap(canvas, new int[]{2, 3, 4, 1, 5, 7, 6});
+            drawBitmap(canvas, i6);
         } else if (position == 7 || position == -7) {
-            drawBitmap(canvas, new int[]{3, 2, 4, 5, 6, 1, 7});
+            drawBitmap(canvas, i7);
         }
     }
 
@@ -1003,6 +992,9 @@ public class ThreeDView7 extends View {
         }
         if (jumpHandler != null) {
             jumpHandler.removeCallbacksAndMessages(null);
+        }
+        if (jumpHandlerII != null) {
+            jumpHandlerII.removeCallbacksAndMessages(null);
         }
         if (reYHandler != null) {
             reYHandler.removeCallbacksAndMessages(null);
@@ -1028,7 +1020,6 @@ public class ThreeDView7 extends View {
         this.stateValueListener = stateValueListener;
     }
 
-    //----------------------------------------------------------------------
     private boolean moreThan2Fingers = false;
 
     private float oldX = 0f;
