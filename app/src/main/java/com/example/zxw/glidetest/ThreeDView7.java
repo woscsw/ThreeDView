@@ -59,7 +59,7 @@ public class ThreeDView7 extends View {
     private final float X_MOVE_DECREASE = 0.7f;//手指移动的阻力
     private final float Y_MOVE_DECREASE = 0.7f;//手指移动的阻力
     private boolean isInfinity = false;
-    private float distanceVelocityDecrease = 10f; //decrease 1 pixels/second when a message is handled in the loop
+    private float distanceVelocityDecrease = 10f; //减速度
     //loop frequency is 60hz or 120hz when handleMessage(msg) includes UI update code
     private float distanceXDecrease = 10f;
     private float distanceYDecrease = 0f;
@@ -70,13 +70,13 @@ public class ThreeDView7 extends View {
     private float jumpItemMiddlX = 0f;//记录distanceX与jumpItemX的中间值
 
     private Handler scrollHandler;//滑动的动画
-    private Handler clickHandler;//点击item,跳转页面
+    private Handler animHandler;//点击item,跳转页面
     private Handler jumpHandler;//跳转到某item
     private Handler jumpHandlerII;//跳转到某item,升级版....带有减速效果
     private Handler reYHandler;//复位绕X轴的旋转
     private Handler scrollStopHandler;//滑动后复位的动画
     private boolean isScroll = false;//用于限制滑动时点击item
-    private boolean isTouch = true;//用于点击中间item后，限制触摸view滑动
+    private boolean isTouch = true;//用于点击中间item后，限制触摸view滑动，并没有完全限制到..
 
     public ThreeDView7(Context context) {
         this(context, null);
@@ -274,7 +274,7 @@ public class ThreeDView7 extends View {
                     scrollStopHandler.sendEmptyMessage(0);
                     return true;
                 }
-                if (xVelocity == 0f) { // anim will stop
+                if (xVelocity == 0f) { // 用不上了...不会跑这里的
                     /**
                      * 滑动后，减速到一定程度，偏匀速转动到指定位置
                      */
@@ -342,16 +342,16 @@ public class ThreeDView7 extends View {
                 return true;
             }
         });
-        clickHandler = new Handler(new Handler.Callback() {
+        animHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
                 isTouch = false;
                 isScroll = true;
-                Log.i("clickHandler", "clickHandler");
-                if (msg.what == 1) {
+                Log.i("animHandler", "animHandler");
+                if (msg.what == 1) {//摆正view，Y偏移值到0
                     if ((distanceY > 0 && distanceY < 1) || (distanceY < 0 && distanceY > -1)) {
                         distanceY = 0;
-                        clickHandler.removeMessages(1);
+                        animHandler.removeMessages(1);
 
                     }
                     if (distanceY > 0) {
@@ -360,12 +360,12 @@ public class ThreeDView7 extends View {
                     } else if (distanceY < 0) {
                         distanceY++;
                     } else {
-                        clickHandler.removeMessages(1);
-                        clickHandler.sendEmptyMessage(0);
+                        animHandler.removeMessages(1);
+                        animHandler.sendEmptyMessage(0);
                         return false;
                     }
                     ThreeDView7.this.invalidate();
-                    clickHandler.sendEmptyMessage(1);
+                    animHandler.sendEmptyMessage(1);
 
                 } else if (msg.what == 0) {//放大变形，跳转
                     if (count == 3) {
@@ -375,12 +375,12 @@ public class ThreeDView7 extends View {
                         count = 0;
                         isScroll = false;
                         isTouch = true;
-                        clickHandler.removeCallbacksAndMessages(null);
+                        animHandler.removeCallbacksAndMessages(null);
                     } else {
                         camera.translate(0, 0, -90);
                         invalidate();
                         count++;
-                        clickHandler.sendEmptyMessage(0);
+                        animHandler.sendEmptyMessage(0);
                     }
                 } else if (msg.what == 2) {//缩小变形
                     if (count == 3) {
@@ -388,12 +388,12 @@ public class ThreeDView7 extends View {
                         count = 0;
                         isScroll = false;
                         isTouch = true;
-                        clickHandler.removeCallbacksAndMessages(null);
+                        animHandler.removeCallbacksAndMessages(null);
                     } else {
                         camera.translate(0, 0, 90);
                         invalidate();
                         count++;
-                        clickHandler.sendEmptyMessage(2);
+                        animHandler.sendEmptyMessage(2);
                     }
 
                 }
@@ -405,7 +405,7 @@ public class ThreeDView7 extends View {
     private int count = 0;//用来计数动画进度clickHandler
 
     public void activityResult() {
-        clickHandler.sendEmptyMessageDelayed(2, 500);
+        animHandler.sendEmptyMessageDelayed(2, 500);
     }
 
     //设置速度下降率
@@ -920,10 +920,6 @@ public class ThreeDView7 extends View {
         distanceToDegree = 90f / 280;//NOT changed when cameraZtranslate changed in the future
     }
 
-    @Override
-    public boolean hasOverlappingRendering() {
-        return false;
-    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -944,7 +940,7 @@ public class ThreeDView7 extends View {
             Matrix matrix = matrices.get(i);
             matrix.reset();
             camera.save();
-            camera.rotateX(xDeg); // it will lead to rotate Y and Z axis
+            camera.rotateX(xDeg);
             float rotate = 0;
             if (i == 6) {
                 rotate = yDeg + ANGLE * 5 + ANGLE2;
@@ -952,12 +948,12 @@ public class ThreeDView7 extends View {
                 rotate = yDeg + ANGLE * i;
             }
 //            Log.i("setMatrix", "i=" + i + "  --rotate = " + rotate);
-            camera.rotateY(rotate);// it will just lead to rotate Z axis, NOT X axis. BUT rotateZ(deg) will lead to nothing
+            camera.rotateY(rotate);
             camera.rotateZ(-rotateDeg);
             camera.translate(0f, 0f, -cameraZtranslate);
             camera.getMatrix(matrix);
-            camera.restore(); // restore to the original state after uses for next use
-            // translate coordinate origin the camera's transformation depends on to center of the bitmap
+            camera.restore();
+            // 中心位置
             matrix.preTranslate(-(BIT_MAP_WIDTH / 2), -(BIT_MAP_HEIGHT / 2));
             matrix.postTranslate(BIT_MAP_WIDTH / 2, BIT_MAP_HEIGHT / 2);
         }
@@ -1010,8 +1006,8 @@ public class ThreeDView7 extends View {
         if (reYHandler != null) {
             reYHandler.removeCallbacksAndMessages(null);
         }
-        if (clickHandler != null) {
-            clickHandler.removeCallbacksAndMessages(null);
+        if (animHandler != null) {
+            animHandler.removeCallbacksAndMessages(null);
         }
         if (scrollStopHandler != null) {
             scrollStopHandler.removeCallbacksAndMessages(null);
@@ -1107,7 +1103,6 @@ public class ThreeDView7 extends View {
                         twoFingersGestureListener.onScaled(deltaScaledX, deltaScaledY, currDeltaScaledDistance, currDeltaMilliseconds);
                         twoFingersGestureListener.onRotated(currDeltaRotatedDeg, currDeltaMilliseconds);
                     }
-                    // handle move
                     newX = (event.getX(0) + event.getX(1)) / 2f;
                     newY = (event.getY(0) + event.getY(1)) / 2f;
                 } else {
@@ -1267,7 +1262,6 @@ public class ThreeDView7 extends View {
 
             }
 
-//            onMyClick.onMyClick(null,getItemPosition());
             Log.i("Gesture-onSingleTapUp", "x=" + x + "---y=" + y + "--jumpItemX=" + jumpItemX);
             return false;
         }
@@ -1417,7 +1411,7 @@ public class ThreeDView7 extends View {
         //中
        else if (x >= 230 && x <= 533) {
             if (y >= 230 && y <= 650) {
-                clickHandler.sendEmptyMessage(1);
+                animHandler.sendEmptyMessage(1);
             }
         }
         //下右    ok
