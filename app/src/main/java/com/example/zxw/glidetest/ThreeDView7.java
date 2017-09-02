@@ -20,6 +20,16 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *  1.需要计算每个item的度数 ANGLE，一共360
+ *  2.设置BIT_MAP_WIDTH，BIT_MAP_HEIGHT，即item的大小
+ *  3.view的半径 cameraZtranslate
+ *  4.设置item图片 imgs
+ *  5.设置 上滑最大值 DISTANCE_Y_TOP，下滑最大值 DISTANCE_Y_BOTTOM
+ *  6.distanceY 影响刚加载时的显示 Y倾斜值
+ *  7. JUMP_Y 复位的Y
+ *  。。。。。懒得写了
+ */
 public class ThreeDView7 extends View {
     private static final String TAG = ThreeDView7.class.getSimpleName();
     private int THREE_D_VIEW_WIDTH;
@@ -34,17 +44,20 @@ public class ThreeDView7 extends View {
     private Paint paint;
     private List<Bitmap> bitmaps = new ArrayList<>();
     private List<Matrix> matrices = new ArrayList<>();
-    private float distanceX = 0f;
-    private float distanceY = 60f;//倾斜角度
-    private float rotateDeg = 0f;
-    private final int VIEW_COUNT = 7;
-    private float angItem = 51.4f;
-    private float angItem2 = 51.6f;
-    private float restFloat = 160;//计算每个item的float,每个item距离distanceX=160
+    private float distanceX = 0f;//X偏移值
+    private float distanceY = 60f;//Y倾斜值
+    private float rotateDeg = 0f;//双指旋转角度
+
+    private final float DISTANCE_Y_TOP = -30f;//上滑最大值
+    private final float DISTANCE_Y_BOTTOM = 100f;//下滑最大值
+    private final int VIEW_COUNT = 7;//item数量
+    private final float ANGLE = 51.4f;//每个item的度数
+    private final float ANGLE2 = 51.6f;//特殊item的度数，当360无法平均分配时使用
+    private final float ITEM_FLOAT = 160;//计算每个item的float,每个item距离distanceX=160...亲测可用...不知道怎么来的
     private float distanceToDegree;
     private float X_VELOCITY_DECREASE = 0.003f;//数值越小惯性越小
-    private float X_MOVE_DECREASE = 0.7f;//手指移动的阻力
-    private float Y_MOVE_DECREASE = 0.7f;//手指移动的阻力
+    private final float X_MOVE_DECREASE = 0.7f;//手指移动的阻力
+    private final float Y_MOVE_DECREASE = 0.7f;//手指移动的阻力
     private boolean isInfinity = false;
     private float distanceVelocityDecrease = 10f; //decrease 1 pixels/second when a message is handled in the loop
     //loop frequency is 60hz or 120hz when handleMessage(msg) includes UI update code
@@ -53,7 +66,7 @@ public class ThreeDView7 extends View {
     private float xVelocity = 0f;
     private float yVelocity = 0f;
     private float jumpItemX = 0f;//记录要跳转的distanceX
-    private final float jumpItemY = 60f;
+    private final float JUMP_Y = 60f;
     private float jumpItemMiddlX = 0f;//记录distanceX与jumpItemX的中间值
 
     private Handler scrollHandler;//滑动的动画
@@ -98,17 +111,17 @@ public class ThreeDView7 extends View {
         reYHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-                Log.i("reYHandler", "jumpItemY=" + jumpItemY + "----distanceY=" + distanceY);
+                Log.i("reYHandler", "JUMP_Y=" + JUMP_Y + "----distanceY=" + distanceY);
                 isScroll = true;
-                if (Math.abs(distanceY - jumpItemY )<= distanceYDecrease) {
-                    distanceY = jumpItemY;
+                if (Math.abs(distanceY - JUMP_Y)<= distanceYDecrease) {
+                    distanceY = JUMP_Y;
                 }
-                if (distanceY > jumpItemY) {
+                if (distanceY > JUMP_Y) {
                     distanceY = distanceY - distanceYDecrease;
-                } else if (distanceY < jumpItemY) {
+                } else if (distanceY < JUMP_Y) {
                     distanceY = distanceY + distanceYDecrease;
                 }
-                if (distanceY == jumpItemY) {
+                if (distanceY == JUMP_Y) {
                     reYHandler.removeMessages(0);
                     invalidate();
                     isScroll = false;
@@ -134,10 +147,10 @@ public class ThreeDView7 extends View {
                 } else if (distanceX < jumpItemX) {
                     distanceX = distanceX + distanceXDecrease;
                 }
-                if (distanceX > restFloat * 7) {
-                    distanceX -= restFloat * 7;
-                } else if (distanceX < -restFloat * 7) {
-                    distanceX += restFloat * 7;
+                if (distanceX > ITEM_FLOAT * 7) {
+                    distanceX -= ITEM_FLOAT * 7;
+                } else if (distanceX < -ITEM_FLOAT * 7) {
+                    distanceX += ITEM_FLOAT * 7;
                 }
                 if (distanceX == jumpItemX ) {
                     jumpHandler.removeMessages(0);
@@ -180,10 +193,10 @@ public class ThreeDView7 extends View {
                     }
                 }
                 Log.i(TAG,"jumpHandlerII   jumpItemX=" + jumpItemX + "  ----distanceX=" + distanceX+"  ---jumpItemMiddlX="+jumpItemMiddlX+"   --distanceXDecrease="+distanceXDecrease);
-                if (distanceX > restFloat * 7) {
-                    distanceX -= restFloat * 7;
-                } else if (distanceX < -restFloat * 7) {
-                    distanceX += restFloat * 7;
+                if (distanceX > ITEM_FLOAT * 7) {
+                    distanceX -= ITEM_FLOAT * 7;
+                } else if (distanceX < -ITEM_FLOAT * 7) {
+                    distanceX += ITEM_FLOAT * 7;
                 }
                 if (distanceX == jumpItemX) {
                     jumpHandlerII.removeMessages(0);
@@ -205,15 +218,15 @@ public class ThreeDView7 extends View {
                 isScroll = true;
                 distanceX += (xVelocity * X_VELOCITY_DECREASE);
 //                distanceY += (yVelocity * X_VELOCITY_DECREASE);
-                if (distanceY < -30) {
-                    distanceY = -30;
-                } else if (distanceY > 100) {
-                    distanceY = 100;
+                if (distanceY < DISTANCE_Y_TOP) {
+                    distanceY =DISTANCE_Y_TOP;
+                } else if (distanceY > DISTANCE_Y_BOTTOM) {
+                    distanceY = DISTANCE_Y_BOTTOM;
                 }
-                if (distanceX > restFloat * 7) {
-                    distanceX -= restFloat * 7;
-                } else if (distanceX < -restFloat * 7) {
-                    distanceX += restFloat * 7;
+                if (distanceX > ITEM_FLOAT * 7) {
+                    distanceX -= ITEM_FLOAT * 7;
+                } else if (distanceX < -ITEM_FLOAT * 7) {
+                    distanceX += ITEM_FLOAT * 7;
                 }
                 ThreeDView7.this.invalidate();
                 if (ThreeDView7.this.stateValueListener != null) {
@@ -291,8 +304,8 @@ public class ThreeDView7 extends View {
                     ThreeDView7.this.invalidate();
                     return true;
                 }
-                if (Math.abs(distanceX) <= Math.abs(xVelocity * X_VELOCITY_DECREASE)  && (jumpItemX == restFloat * 7 || jumpItemX == -restFloat * 7)) {
-                    //特殊情况...因为当distanceX>restFloat*7||distanceX<-restFloat*7时会distanceX -= restFloat * 7;导致会至少多转一圈
+                if (Math.abs(distanceX) <= Math.abs(xVelocity * X_VELOCITY_DECREASE)  && (jumpItemX == ITEM_FLOAT * 7 || jumpItemX == -ITEM_FLOAT * 7)) {
+                    //特殊情况...因为当distanceX>ITEM_FLOAT*7||distanceX<-ITEM_FLOAT*7时会distanceX -= ITEM_FLOAT * 7;导致会至少多转一圈
                     distanceX = jumpItemX;
                     ThreeDView7.this.invalidate();
                     return true;
@@ -304,10 +317,10 @@ public class ThreeDView7 extends View {
                 } else if (distanceY > 100) {
                     distanceY = 100;
                 }
-                if (distanceX > restFloat * 7) {
-                    distanceX -= restFloat * 7;
-                } else if (distanceX < -restFloat * 7) {
-                    distanceX += restFloat * 7;
+                if (distanceX > ITEM_FLOAT * 7) {
+                    distanceX -= ITEM_FLOAT * 7;
+                } else if (distanceX < -ITEM_FLOAT * 7) {
+                    distanceX += ITEM_FLOAT * 7;
                 }
                 ThreeDView7.this.invalidate();
                 if (ThreeDView7.this.stateValueListener != null) {
@@ -391,7 +404,7 @@ public class ThreeDView7 extends View {
 
     private int count = 0;//用来计数动画进度clickHandler
 
-    public void resetStart() {
+    public void activityResult() {
         clickHandler.sendEmptyMessageDelayed(2, 500);
     }
 
@@ -405,7 +418,7 @@ public class ThreeDView7 extends View {
             this.distanceVelocityDecrease = distanceVelocityDecrease;
         }
     }
-
+    //手指移动
     public void updateXY(float movedX, float movedY) {
         Log.i(TAG, "updateXY: movedX= "+movedX+"  ---movedY= "+movedY);
         this.distanceX += movedX*X_MOVE_DECREASE;
@@ -415,17 +428,17 @@ public class ThreeDView7 extends View {
         } else if (distanceY < -30) {
             distanceY = -30;
         }
-        if (distanceX > restFloat * 7) {
-            distanceX -= restFloat * 7;
-        } else if (distanceX < -restFloat * 7) {
-            distanceX += restFloat * 7;
+        if (distanceX > ITEM_FLOAT * 7) {
+            distanceX -= ITEM_FLOAT * 7;
+        } else if (distanceX < -ITEM_FLOAT * 7) {
+            distanceX += ITEM_FLOAT * 7;
         }
         invalidate();
         if (ThreeDView7.this.stateValueListener != null) {
             ThreeDView7.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
         }
     }
-
+    //更新双指旋转角度
     public void updateRotateDeg(float deltaRotateDeg) {
         this.rotateDeg += deltaRotateDeg;
         invalidate();
@@ -433,7 +446,7 @@ public class ThreeDView7 extends View {
             ThreeDView7.this.stateValueListener.stateValue(distanceX, -distanceY, rotateDeg, cameraZtranslate);
         }
     }
-
+    //更新View的半径
     public void updateCameraZtranslate(float cameraZtranslate) {
         this.cameraZtranslate += cameraZtranslate;
         invalidate();
@@ -444,70 +457,70 @@ public class ThreeDView7 extends View {
 
     //停止滑动
     public void stopScroll() {
-        scrollHandler.removeCallbacksAndMessages(null);
-        scrollStopHandler.removeCallbacksAndMessages(null);
-        reYHandler.removeCallbacksAndMessages(null);
-        jumpHandler.removeCallbacksAndMessages(null);
+        scrollHandler.removeMessages(0);
+        scrollStopHandler.removeMessages(0);
+        reYHandler.removeMessages(0);
+        jumpHandler.removeMessages(0);
     }
 
-    //滑动动画
-    public void startAnim(float xVelocity, float yVelocity) {
+    //惯性滑动动画
+    public void startScroll(float xVelocity, float yVelocity) {
         this.xVelocity = xVelocity;
         this.yVelocity = yVelocity;
         reLayoutY();
-        jumpHandler.removeCallbacksAndMessages(null);
+        jumpHandler.removeMessages(0);
         scrollHandler.sendEmptyMessage(0);
     }
 
     //Y复位
     public void reLayoutY() {
-        if (yVelocity == 0f && distanceY != jumpItemY) {
-            distanceYDecrease = Math.abs(distanceY - jumpItemY) / 10f;
+        if (yVelocity == 0f && distanceY != JUMP_Y) {
+            distanceYDecrease = Math.abs(distanceY - JUMP_Y) / 10f;
             reYHandler.sendEmptyMessage(0);
         }
     }
 
-    //放手时复位
+    //View复位
     public void reLayout() {
         Log.i("reLayout", "reLayout");
         int position = getItemPosition();
         if (position == 1) {
             jumpItemX = 0;
         } else if (position == 2) {
-            jumpItemX = restFloat * 6;
+            jumpItemX = ITEM_FLOAT * 6;
         } else if (position == 3) {
-            jumpItemX = restFloat * 5;
+            jumpItemX = ITEM_FLOAT * 5;
         } else if (position == 4) {
-            jumpItemX = restFloat * 4;
+            jumpItemX = ITEM_FLOAT * 4;
         } else if (position == 5) {
-            jumpItemX = restFloat * 3;
+            jumpItemX = ITEM_FLOAT * 3;
         } else if (position == 6) {
-            jumpItemX = restFloat * 2;
+            jumpItemX = ITEM_FLOAT * 2;
         } else if (position == 7) {
-            jumpItemX = restFloat;
+            jumpItemX = ITEM_FLOAT;
         } else if (position == 11) {
-            jumpItemX = restFloat * 7;
+            jumpItemX = ITEM_FLOAT * 7;
         } else if (position == -1) {
-            jumpItemX = -restFloat * 7;
+            jumpItemX = -ITEM_FLOAT * 7;
         } else if (position == -2) {
-            jumpItemX = -restFloat;
+            jumpItemX = -ITEM_FLOAT;
         } else if (position == -3) {
-            jumpItemX = -restFloat * 2;
+            jumpItemX = -ITEM_FLOAT * 2;
         } else if (position == -4) {
-            jumpItemX = -restFloat * 3;
+            jumpItemX = -ITEM_FLOAT * 3;
         } else if (position == -5) {
-            jumpItemX = -restFloat * 4;
+            jumpItemX = -ITEM_FLOAT * 4;
         } else if (position == -6) {
-            jumpItemX = -restFloat * 5;
+            jumpItemX = -ITEM_FLOAT * 5;
         } else if (position == -7) {
-            jumpItemX = -restFloat * 6 + restFloat * (angItem - angItem2) / angItem;
+            jumpItemX = -ITEM_FLOAT * 6 + ITEM_FLOAT * (ANGLE - ANGLE2) / ANGLE;
         }
         distanceXDecrease = Math.abs(jumpItemX - distanceX) / 10f;
         jumpHandler.removeMessages(0);
         jumpHandler.sendEmptyMessage(0);
 
     }
-
+    //跳转下一个
     public void jumpNext() {
         int position = getItemPosition();
         if (Math.abs(position) == 11) {
@@ -518,7 +531,7 @@ public class ThreeDView7 extends View {
             setCurrentItem(Math.abs(position) + 1);
         }
     }
-
+    //跳转上一个
     public void jumpPre() {
         int position = getItemPosition();
         if (Math.abs(position) == 11 || Math.abs(position) == 1) {
@@ -537,129 +550,129 @@ public class ThreeDView7 extends View {
                 jumpItemX = 0;
                 return;
             } else if (itemPosition == -1) {
-                jumpItemX = -restFloat * 7;
+                jumpItemX = -ITEM_FLOAT * 7;
                 return;
             } else if (itemPosition == 11) {
-                jumpItemX = restFloat * 7;
+                jumpItemX = ITEM_FLOAT * 7;
                 return;
             } else if (itemPosition == 2 || itemPosition == 3 || itemPosition == 4) {
-                jumpItemX = restFloat * 7;
+                jumpItemX = ITEM_FLOAT * 7;
             } else if (itemPosition == -5 || itemPosition == -6 || itemPosition == -7) {
-                jumpItemX = -restFloat * 7;
+                jumpItemX = -ITEM_FLOAT * 7;
             } else {
                 jumpItemX = 0;
             }
         } else if (position == 2) {
             if (itemPosition == 2) {
-                jumpItemX = restFloat * 6;
+                jumpItemX = ITEM_FLOAT * 6;
                 return;
             } else if (itemPosition == -2) {
-                jumpItemX = -restFloat;
+                jumpItemX = -ITEM_FLOAT;
                 return;
             } else if (itemPosition == 1 || itemPosition == 6 || itemPosition == 7
                     || itemPosition == -3 || itemPosition == -4 || itemPosition == -5) {
-                jumpItemX = -restFloat;
+                jumpItemX = -ITEM_FLOAT;
             } else if (itemPosition == -6) {
-                distanceX = restFloat * 2;
-                jumpItemX = -restFloat;
+                distanceX = ITEM_FLOAT * 2;
+                jumpItemX = -ITEM_FLOAT;
             } else if (itemPosition == -7) {
-                distanceX = restFloat;
-                jumpItemX = -restFloat;
+                distanceX = ITEM_FLOAT;
+                jumpItemX = -ITEM_FLOAT;
             } else if (itemPosition == -1) {
                 distanceX = 0;
-                jumpItemX = -restFloat;
+                jumpItemX = -ITEM_FLOAT;
             } else {
-                jumpItemX = restFloat * 6;
+                jumpItemX = ITEM_FLOAT * 6;
             }
         } else if (position == 3) {
             if (itemPosition == 3) {
-                jumpItemX = restFloat * 5;
+                jumpItemX = ITEM_FLOAT * 5;
                 return;
             } else if (itemPosition == -3) {
-                jumpItemX = -restFloat * 2;
+                jumpItemX = -ITEM_FLOAT * 2;
                 return;
             } else if (itemPosition == 1 || itemPosition == -2 || itemPosition == 7
                     || itemPosition == -6 || itemPosition == -4 || itemPosition == -5) {
-                jumpItemX = -restFloat * 2;
+                jumpItemX = -ITEM_FLOAT * 2;
             } else if (itemPosition == -7) {
-                distanceX = restFloat;
-                jumpItemX = -restFloat * 2;
+                distanceX = ITEM_FLOAT;
+                jumpItemX = -ITEM_FLOAT * 2;
             } else if (itemPosition == -1) {
                 distanceX = 0;
-                jumpItemX = -restFloat * 2;
+                jumpItemX = -ITEM_FLOAT * 2;
             } else {
-                jumpItemX = restFloat * 5;
+                jumpItemX = ITEM_FLOAT * 5;
             }
         } else if (position == 4) {
             if (itemPosition == 4) {
-                jumpItemX = restFloat * 4;
+                jumpItemX = ITEM_FLOAT * 4;
                 return;
             } else if (itemPosition == -4) {
-                jumpItemX = -restFloat * 3;
+                jumpItemX = -ITEM_FLOAT * 3;
                 return;
             } else if (itemPosition == -1) {
                 distanceX = 0;
-                jumpItemX = -restFloat * 3;
+                jumpItemX = -ITEM_FLOAT * 3;
             } else if (itemPosition < 0 || itemPosition == 1) {
-                jumpItemX = -restFloat * 3;
+                jumpItemX = -ITEM_FLOAT * 3;
             } else {
-                jumpItemX = restFloat * 4;
+                jumpItemX = ITEM_FLOAT * 4;
             }
         } else if (position == 5) {
             if (itemPosition == 5) {
-                jumpItemX = restFloat * 3;
+                jumpItemX = ITEM_FLOAT * 3;
                 return;
             } else if (itemPosition == -5) {
-                jumpItemX = -restFloat * 4;
+                jumpItemX = -ITEM_FLOAT * 4;
                 return;
             } else if (itemPosition < 0) {
-                jumpItemX = -restFloat * 4;
+                jumpItemX = -ITEM_FLOAT * 4;
             } else if (itemPosition == 11) {
                 distanceX = 0;
-                jumpItemX = restFloat * 3;
+                jumpItemX = ITEM_FLOAT * 3;
             } else {
-                jumpItemX = restFloat * 3;
+                jumpItemX = ITEM_FLOAT * 3;
             }
         } else if (position == 6) {
             if (itemPosition == 6) {
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
                 return;
             } else if (itemPosition == -6) {
-                jumpItemX = -restFloat * 5;
+                jumpItemX = -ITEM_FLOAT * 5;
                 return;
             } else if (itemPosition == -2) {
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
             } else if (itemPosition < 0) {
-                jumpItemX = -restFloat * 5;
+                jumpItemX = -ITEM_FLOAT * 5;
             } else if (itemPosition == 2) {
-                distanceX = -restFloat;
-                jumpItemX = restFloat * 2;
+                distanceX = -ITEM_FLOAT;
+                jumpItemX = ITEM_FLOAT * 2;
             } else if (itemPosition == 11) {
                 distanceX = 0;
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
             } else {
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
             }
         } else if (position == 7) {
             if (itemPosition == 7) {
-                jumpItemX = restFloat;
+                jumpItemX = ITEM_FLOAT;
                 return;
             } else if (itemPosition == -7) {
-                jumpItemX = -restFloat * 6;
+                jumpItemX = -ITEM_FLOAT * 6;
                 return;
             } else if (itemPosition == -4 || itemPosition == -5 || itemPosition == -6) {
-                jumpItemX = -restFloat * 6;
+                jumpItemX = -ITEM_FLOAT * 6;
             } else if (itemPosition == -2) {
-                distanceX = -restFloat;
-                jumpItemX = restFloat;
+                distanceX = -ITEM_FLOAT;
+                jumpItemX = ITEM_FLOAT;
             } else if (itemPosition == -3) {
-                distanceX = -restFloat * 2;
-                jumpItemX = restFloat;
+                distanceX = -ITEM_FLOAT * 2;
+                jumpItemX = ITEM_FLOAT;
             } else if (itemPosition == 11 || itemPosition == -1||itemPosition == 1) {
                 distanceX = 0;
-                jumpItemX = restFloat;
+                jumpItemX = ITEM_FLOAT;
             } else {
-                jumpItemX = restFloat;
+                jumpItemX = ITEM_FLOAT;
             }
         }
         distanceXDecrease = Math.abs(jumpItemX - distanceX) / 20f;
@@ -668,8 +681,8 @@ public class ThreeDView7 extends View {
         }
         jumpHandler.removeMessages(0);
         jumpHandlerII.removeMessages(0);
-        scrollStopHandler.removeCallbacksAndMessages(null);
-        scrollHandler.removeCallbacksAndMessages(null);
+        scrollStopHandler.removeMessages(0);
+        scrollHandler.removeMessages(0);
         jumpHandlerII.sendEmptyMessage(0);
     }
 
@@ -681,129 +694,129 @@ public class ThreeDView7 extends View {
                 jumpItemX = 0;
                 return false;
             } else if (itemPosition == -1) {
-                jumpItemX = -restFloat * 7;
+                jumpItemX = -ITEM_FLOAT * 7;
                 return false;
             } else if (itemPosition == 11) {
-                jumpItemX = restFloat * 7;
+                jumpItemX = ITEM_FLOAT * 7;
                 return false;
             } else if (itemPosition == 2 || itemPosition == 3 || itemPosition == 4) {
-                jumpItemX = restFloat * 7;
+                jumpItemX = ITEM_FLOAT * 7;
             } else if (itemPosition == -5 || itemPosition == -6 || itemPosition == -7) {
-                jumpItemX = -restFloat * 7;
+                jumpItemX = -ITEM_FLOAT * 7;
             } else {
                 jumpItemX = 0;
             }
         } else if (position == 2) {
             if (itemPosition == 2) {
-                jumpItemX = restFloat * 6;
+                jumpItemX = ITEM_FLOAT * 6;
                 return false;
             } else if (itemPosition == -2) {
-                jumpItemX = -restFloat;
+                jumpItemX = -ITEM_FLOAT;
                 return false;
             } else if (itemPosition == 1 || itemPosition == 6 || itemPosition == 7
                     || itemPosition == -3 || itemPosition == -4 || itemPosition == -5) {
-                jumpItemX = -restFloat;
+                jumpItemX = -ITEM_FLOAT;
             } else if (itemPosition == -6) {
-//                distanceX = restFloat * 2;
-                jumpItemX = -restFloat;
+//                distanceX = ITEM_FLOAT * 2;
+                jumpItemX = -ITEM_FLOAT;
             } else if (itemPosition == -7) {
-//                distanceX = restFloat;
-                jumpItemX = -restFloat;
+//                distanceX = ITEM_FLOAT;
+                jumpItemX = -ITEM_FLOAT;
             } else if (itemPosition == -1) {
 //                distanceX = 0;
-                jumpItemX = -restFloat;
+                jumpItemX = -ITEM_FLOAT;
             } else {
-                jumpItemX = restFloat * 6;
+                jumpItemX = ITEM_FLOAT * 6;
             }
         } else if (position == 3) {
             if (itemPosition == 3) {
-                jumpItemX = restFloat * 5;
+                jumpItemX = ITEM_FLOAT * 5;
                 return false;
             } else if (itemPosition == -3) {
-                jumpItemX = -restFloat * 2;
+                jumpItemX = -ITEM_FLOAT * 2;
                 return false;
             } else if (itemPosition == 1 || itemPosition == -2 || itemPosition == 7
                     || itemPosition == -6 || itemPosition == -4 || itemPosition == -5) {
-                jumpItemX = -restFloat * 2;
+                jumpItemX = -ITEM_FLOAT * 2;
             } else if (itemPosition == -7) {
-//                distanceX = restFloat;
-                jumpItemX = -restFloat * 2;
+//                distanceX = ITEM_FLOAT;
+                jumpItemX = -ITEM_FLOAT * 2;
             } else if (itemPosition == -1) {
 //                distanceX = 0;
-                jumpItemX = -restFloat * 2;
+                jumpItemX = -ITEM_FLOAT * 2;
             } else {
-                jumpItemX = restFloat * 5;
+                jumpItemX = ITEM_FLOAT * 5;
             }
         } else if (position == 4) {
             if (itemPosition == 4) {
-                jumpItemX = restFloat * 4;
+                jumpItemX = ITEM_FLOAT * 4;
                 return false;
             } else if (itemPosition == -4) {
-                jumpItemX = -restFloat * 3;
+                jumpItemX = -ITEM_FLOAT * 3;
                 return false;
             } else if (itemPosition == -1) {
 //                distanceX = 0;
-                jumpItemX = -restFloat * 3;
+                jumpItemX = -ITEM_FLOAT * 3;
             } else if (itemPosition < 0 || itemPosition == 1) {
-                jumpItemX = -restFloat * 3;
+                jumpItemX = -ITEM_FLOAT * 3;
             } else {
-                jumpItemX = restFloat * 4;
+                jumpItemX = ITEM_FLOAT * 4;
             }
         } else if (position == 5) {
             if (itemPosition == 5) {
-                jumpItemX = restFloat * 3;
+                jumpItemX = ITEM_FLOAT * 3;
                 return false;
             } else if (itemPosition == -5) {
-                jumpItemX = -restFloat * 4;
+                jumpItemX = -ITEM_FLOAT * 4;
                 return false;
             } else if (itemPosition < 0) {
-                jumpItemX = -restFloat * 4;
+                jumpItemX = -ITEM_FLOAT * 4;
             } else if (itemPosition == 11) {
 //                distanceX = 0;
-                jumpItemX = restFloat * 3;
+                jumpItemX = ITEM_FLOAT * 3;
             } else {
-                jumpItemX = restFloat * 3;
+                jumpItemX = ITEM_FLOAT * 3;
             }
         } else if (position == 6) {
             if (itemPosition == 6) {
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
                 return false;
             } else if (itemPosition == -6) {
-                jumpItemX = -restFloat * 5;
+                jumpItemX = -ITEM_FLOAT * 5;
                 return false;
             } else if (itemPosition == -2) {
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
             } else if (itemPosition < 0) {
-                jumpItemX = -restFloat * 5;
+                jumpItemX = -ITEM_FLOAT * 5;
             } else if (itemPosition == 2) {
-//                distanceX = -restFloat;
-                jumpItemX = restFloat * 2;
+//                distanceX = -ITEM_FLOAT;
+                jumpItemX = ITEM_FLOAT * 2;
             } else if (itemPosition == 11) {
 //                distanceX = 0;
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
             } else {
-                jumpItemX = restFloat * 2;
+                jumpItemX = ITEM_FLOAT * 2;
             }
         } else if (position == 7) {
             if (itemPosition == 7) {
-                jumpItemX = restFloat;
+                jumpItemX = ITEM_FLOAT;
                 return false;
             } else if (itemPosition == -7) {
-                jumpItemX = -restFloat * 6;
+                jumpItemX = -ITEM_FLOAT * 6;
                 return false;
             } else if (itemPosition == -4 || itemPosition == -5 || itemPosition == -6) {
-                jumpItemX = -restFloat * 6;
+                jumpItemX = -ITEM_FLOAT * 6;
             } else if (itemPosition == -2) {
-//                distanceX = -restFloat;
-                jumpItemX = restFloat;
+//                distanceX = -ITEM_FLOAT;
+                jumpItemX = ITEM_FLOAT;
             } else if (itemPosition == -3) {
-//                distanceX = -restFloat * 2;
-                jumpItemX = restFloat;
+//                distanceX = -ITEM_FLOAT * 2;
+                jumpItemX = ITEM_FLOAT;
             } else if (itemPosition == 11 || itemPosition == -1) {
 //                distanceX = 0;
-                jumpItemX = restFloat;
+                jumpItemX = ITEM_FLOAT;
             } else {
-                jumpItemX = restFloat;
+                jumpItemX = ITEM_FLOAT;
             }
         }
         return true;
@@ -816,90 +829,86 @@ public class ThreeDView7 extends View {
                 f = 0f;
                 break;
             case 11:
-                f = restFloat * 7;
+                f = ITEM_FLOAT * 7;
                 break;
             case -1:
-                f = -restFloat * 7;
+                f = -ITEM_FLOAT * 7;
                 break;
             case 2:
-                f = restFloat * 6;
+                f = ITEM_FLOAT * 6;
                 break;
             case -2:
-                f = -restFloat;
+                f = -ITEM_FLOAT;
                 break;
             case 3:
-                f = restFloat * 5;
+                f = ITEM_FLOAT * 5;
                 break;
             case -3:
-                f = -restFloat * 2;
+                f = -ITEM_FLOAT * 2;
                 break;
             case 4:
-                f = restFloat * 4;
+                f = ITEM_FLOAT * 4;
                 break;
             case -4:
-                f = -restFloat * 3;
+                f = -ITEM_FLOAT * 3;
                 break;
             case 5:
-                f = restFloat * 3;
+                f = ITEM_FLOAT * 3;
                 break;
             case -5:
-                f = -restFloat * 4;
+                f = -ITEM_FLOAT * 4;
                 break;
             case 6:
-                f = restFloat * 2;
+                f = ITEM_FLOAT * 2;
                 break;
             case -6:
-                f = -restFloat * 5;
+                f = -ITEM_FLOAT * 5;
                 break;
             case 7:
-                f = restFloat;
+                f = ITEM_FLOAT;
                 break;
             case -7:
-                f = -restFloat * 6;
+                f = -ITEM_FLOAT * 6;
                 break;
         }
         return f;
     }
-
+    //获取item的编号
     public int getItemPosition() {
         int position = 1;
-        if (distanceX > -restFloat / 2 && distanceX <= restFloat / 2) {
+        if (distanceX > -ITEM_FLOAT / 2 && distanceX <= ITEM_FLOAT / 2) {
             position = 1;
-        } else if (distanceX > restFloat * 13 / 2 && distanceX <= restFloat * 7) {
+        } else if (distanceX > ITEM_FLOAT * 13 / 2 && distanceX <= ITEM_FLOAT * 7) {
             position = 11;
-        } else if ((distanceX >= -restFloat * 7 && distanceX <= -restFloat * 13 / 2)) {
+        } else if ((distanceX >= -ITEM_FLOAT * 7 && distanceX <= -ITEM_FLOAT * 13 / 2)) {
             position = -1;
-        } else if (distanceX > -restFloat * 3 / 2 && distanceX <= -restFloat / 2) {
+        } else if (distanceX > -ITEM_FLOAT * 3 / 2 && distanceX <= -ITEM_FLOAT / 2) {
             position = -2;
-        } else if (distanceX <= restFloat * 13 / 2 && distanceX > restFloat * 11 / 2) {
+        } else if (distanceX <= ITEM_FLOAT * 13 / 2 && distanceX > ITEM_FLOAT * 11 / 2) {
             position = 2;
-        } else if (distanceX <= restFloat * 11 / 2 && distanceX > restFloat * 9 / 2) {
+        } else if (distanceX <= ITEM_FLOAT * 11 / 2 && distanceX > ITEM_FLOAT * 9 / 2) {
             position = 3;
-        } else if (distanceX > -restFloat * 5 / 2 && distanceX <= -restFloat * 3 / 2) {
+        } else if (distanceX > -ITEM_FLOAT * 5 / 2 && distanceX <= -ITEM_FLOAT * 3 / 2) {
             position = -3;
-        } else if (distanceX <= restFloat * 9 / 2 && distanceX > restFloat * 7 / 2) {
+        } else if (distanceX <= ITEM_FLOAT * 9 / 2 && distanceX > ITEM_FLOAT * 7 / 2) {
             position = 4;
-        } else if (distanceX > -restFloat * 7 / 2 && distanceX <= -restFloat * 5 / 2) {
+        } else if (distanceX > -ITEM_FLOAT * 7 / 2 && distanceX <= -ITEM_FLOAT * 5 / 2) {
             position = -4;
-        } else if (distanceX > -restFloat * 9 / 2 && distanceX <= -restFloat * 7 / 2) {
+        } else if (distanceX > -ITEM_FLOAT * 9 / 2 && distanceX <= -ITEM_FLOAT * 7 / 2) {
             position = -5;
-        } else if (distanceX <= restFloat * 7 / 2 && distanceX > restFloat * 5 / 2) {
+        } else if (distanceX <= ITEM_FLOAT * 7 / 2 && distanceX > ITEM_FLOAT * 5 / 2) {
             position = 5;
-        } else if (distanceX > -restFloat * 11 / 2 && distanceX <= -restFloat * 9 / 2) {
+        } else if (distanceX > -ITEM_FLOAT * 11 / 2 && distanceX <= -ITEM_FLOAT * 9 / 2) {
             position = -6;
-        } else if (distanceX <= restFloat * 5 / 2 && distanceX > restFloat * 3 / 2) {
+        } else if (distanceX <= ITEM_FLOAT * 5 / 2 && distanceX > ITEM_FLOAT * 3 / 2) {
             position = 6;//distanceX为正数
-        } else if (distanceX > -restFloat * 13 / 2 && distanceX <= -restFloat * 11 / 2) {
+        } else if (distanceX > -ITEM_FLOAT * 13 / 2 && distanceX <= -ITEM_FLOAT * 11 / 2) {
             position = -7;
-        } else if (distanceX <= restFloat * 3 / 2 && distanceX > restFloat / 2) {
+        } else if (distanceX <= ITEM_FLOAT * 3 / 2 && distanceX > ITEM_FLOAT / 2) {
             position = 7;//distanceX为正数
         }
 //        Log.i("getItemPosition","getItemPosition()=" + position);
         return position;
-    }
-
-    public interface OnMyClick {
-        void onMyClick(View v, int position);
     }
 
     @Override
@@ -907,6 +916,7 @@ public class ThreeDView7 extends View {
         THREE_D_VIEW_WIDTH = w; //params value is in pixels not dp
         THREE_D_VIEW_HEIGHT = h;
 //        cameraZtranslate = Math.min(w, h) / 2;
+        //ITEM_FLOAT = 160 和 distanceToDegree有关联，改了distanceToDegree有影响，暂时还是不要动他
         distanceToDegree = 90f / 280;//NOT changed when cameraZtranslate changed in the future
     }
 
@@ -928,6 +938,7 @@ public class ThreeDView7 extends View {
         canvas.clipRect(-150, -90, 450, 600);
         drawCanvas(canvas);
     }
+
     private void setMatrix(float xDeg, float yDeg) {
         for (int i = 0; i < VIEW_COUNT; i++) {
             Matrix matrix = matrices.get(i);
@@ -936,9 +947,9 @@ public class ThreeDView7 extends View {
             camera.rotateX(xDeg); // it will lead to rotate Y and Z axis
             float rotate = 0;
             if (i == 6) {
-                rotate = yDeg + angItem * 5 + angItem2;
+                rotate = yDeg + ANGLE * 5 + ANGLE2;
             } else {
-                rotate = yDeg + angItem * i;
+                rotate = yDeg + ANGLE * i;
             }
 //            Log.i("setMatrix", "i=" + i + "  --rotate = " + rotate);
             camera.rotateY(rotate);// it will just lead to rotate Z axis, NOT X axis. BUT rotateZ(deg) will lead to nothing
@@ -1292,21 +1303,21 @@ public class ThreeDView7 extends View {
         int position = getItemPosition();
         jumpHandler.removeMessages(0);
         jumpHandlerII.removeMessages(0);
-        scrollStopHandler.removeCallbacksAndMessages(null);
-        scrollHandler.removeCallbacksAndMessages(null);
+        scrollStopHandler.removeMessages(0);
+        scrollHandler.removeMessages(0);
         //上1    ok
         if (x >= 45 && x < 105) {
             if (y > 120 && y < 240) {
                 if (position == 11) {
                     distanceX = 0;
-                    jumpItemX = restFloat * 2;
+                    jumpItemX = ITEM_FLOAT * 2;
                 } else if (position == 2) {
-                    distanceX = -restFloat;
-                    jumpItemX = distanceX + restFloat * 2;
+                    distanceX = -ITEM_FLOAT;
+                    jumpItemX = distanceX + ITEM_FLOAT * 2;
                 } else if (position > 0) {
-                    jumpItemX = distanceX + restFloat * 2;
+                    jumpItemX = distanceX + ITEM_FLOAT * 2;
                 } else {
-                    jumpItemX = distanceX + restFloat * 2;
+                    jumpItemX = distanceX + ITEM_FLOAT * 2;
                 }
                 distanceXDecrease = Math.abs(jumpItemX - distanceX) / 20f;
                 if (jumpItemX != distanceX) {
@@ -1316,19 +1327,19 @@ public class ThreeDView7 extends View {
             }
         }
         //上2    ok
-        if (x >= 107 && x < 370) {
+       else if (x >= 107 && x < 370) {
             if (y > 60 && y < 290) {
                 if (position == 3) {
-                    distanceX = -restFloat * 2;
-                    jumpItemX = distanceX + restFloat * 3;
+                    distanceX = -ITEM_FLOAT * 2;
+                    jumpItemX = distanceX + ITEM_FLOAT * 3;
                 } else if (position == 2) {
-                    distanceX = -restFloat;
-                    jumpItemX = distanceX + restFloat * 3;
+                    distanceX = -ITEM_FLOAT;
+                    jumpItemX = distanceX + ITEM_FLOAT * 3;
                 } else if (position == 11) {
                     distanceX = 0;
-                    jumpItemX = restFloat * 3;
+                    jumpItemX = ITEM_FLOAT * 3;
                 } else {
-                    jumpItemX = distanceX + restFloat * 3;
+                    jumpItemX = distanceX + ITEM_FLOAT * 3;
                 }
                 distanceXDecrease = Math.abs(jumpItemX - distanceX) / 20f;
                 if (jumpItemX != distanceX) {
@@ -1338,23 +1349,23 @@ public class ThreeDView7 extends View {
             }
         }
         //上3    ok
-        if (x >= 390 && x < 650) {
+       else if (x >= 390 && x < 650) {
             if (y > 60 && y < 230) {
                 if (position == 1) {
-                    jumpItemX = distanceX - restFloat * 3;
+                    jumpItemX = distanceX - ITEM_FLOAT * 3;
                 } else if (position > 0) {
-                    jumpItemX = distanceX - restFloat * 3;
+                    jumpItemX = distanceX - ITEM_FLOAT * 3;
                 } else if (position == -6) {
-                    distanceX = restFloat * 2;
-                    jumpItemX = distanceX - restFloat * 3;
+                    distanceX = ITEM_FLOAT * 2;
+                    jumpItemX = distanceX - ITEM_FLOAT * 3;
                 } else if (position == -7) {
-                    distanceX = restFloat;
-                    jumpItemX = distanceX - restFloat * 3;
+                    distanceX = ITEM_FLOAT;
+                    jumpItemX = distanceX - ITEM_FLOAT * 3;
                 } else if (position == -1) {//-1 -3
                     distanceX = 0;
-                    jumpItemX = distanceX - restFloat * 3;
+                    jumpItemX = distanceX - ITEM_FLOAT * 3;
                 } else {
-                    jumpItemX = distanceX - restFloat * 3;
+                    jumpItemX = distanceX - ITEM_FLOAT * 3;
                 }
                 distanceXDecrease = Math.abs(jumpItemX - distanceX) / 20f;
                 if (jumpItemX != distanceX) {
@@ -1365,18 +1376,18 @@ public class ThreeDView7 extends View {
         }
 
         //上4 ok
-        if (x >= 650 && x < 720) {
+       else if (x >= 650 && x < 720) {
             if (y > 120 && y < 240) {
                 if (position > 0) {
-                    jumpItemX = distanceX - restFloat * 2;
+                    jumpItemX = distanceX - ITEM_FLOAT * 2;
                 } else if (position == -7) {
-                    distanceX = restFloat;
-                    jumpItemX = distanceX - restFloat * 2;
+                    distanceX = ITEM_FLOAT;
+                    jumpItemX = distanceX - ITEM_FLOAT * 2;
                 } else if (position == -1) {//-1 -3
                     distanceX = 0;
-                    jumpItemX = distanceX - restFloat * 2;
+                    jumpItemX = distanceX - ITEM_FLOAT * 2;
                 } else {
-                    jumpItemX = distanceX - restFloat * 2;
+                    jumpItemX = distanceX - ITEM_FLOAT * 2;
                 }
                 distanceXDecrease = Math.abs(jumpItemX - distanceX) / 20f;
                 if (jumpItemX != distanceX) {
@@ -1386,15 +1397,15 @@ public class ThreeDView7 extends View {
             }
         }
         //下左    ok
-        if (x >= 45 && x < 230) {
+       else if (x >= 45 && x < 230) {
             if (y > 210 && y < 660) {
                 if (position == 1) {
-                    jumpItemX = restFloat;
+                    jumpItemX = ITEM_FLOAT;
                 } else if (position == 11) {
-                    distanceX -= restFloat * 7;
-                    jumpItemX = restFloat;
+                    distanceX -= ITEM_FLOAT * 7;
+                    jumpItemX = ITEM_FLOAT;
                 } else {
-                    jumpItemX = distanceX + restFloat;
+                    jumpItemX = distanceX + ITEM_FLOAT;
                 }
                 distanceXDecrease = Math.abs(jumpItemX - distanceX) / 20f;
                 if (jumpItemX != distanceX) {
@@ -1404,22 +1415,22 @@ public class ThreeDView7 extends View {
             }
         }
         //中
-        if (x >= 230 && x <= 533) {
+       else if (x >= 230 && x <= 533) {
             if (y >= 230 && y <= 650) {
                 clickHandler.sendEmptyMessage(1);
             }
         }
         //下右    ok
-        if (x >= 533 && x < 720) {
+        else if (x >= 533 && x < 720) {
             if (y > 210 && y < 660) {
                 if (position == 11) {
                     distanceX = 0;
-                    jumpItemX = -restFloat;
+                    jumpItemX = -ITEM_FLOAT;
                 } else if (position == -1) {
                     distanceX = 0;
-                    jumpItemX = -restFloat;
+                    jumpItemX = -ITEM_FLOAT;
                 } else {
-                    jumpItemX = distanceX - restFloat;
+                    jumpItemX = distanceX - ITEM_FLOAT;
                 }
                 distanceXDecrease = Math.abs(jumpItemX - distanceX) / 20f;
                 if (jumpItemX != distanceX) {

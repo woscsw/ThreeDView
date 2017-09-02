@@ -48,7 +48,7 @@ public class ThreeDViewController7 {
                     ThreeDViewController7.this.threeDView.reLayoutY();
                     return;//过滤掉点击
                 }
-                ThreeDViewController7.this.threeDView.startAnim(xVelocity, 0);//限制了y轴的滑动
+                ThreeDViewController7.this.threeDView.startScroll(xVelocity, 0);//限制了y轴的滑动
                 Log.i("onUp", "upX=" + upX+"--upY"+upY+"--upTime="+upTime+"--xVelocity="+xVelocity+"--yVelocity="+yVelocity);
             }
 
